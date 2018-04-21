@@ -1,0 +1,19 @@
+.main-content {
+    background-color: red;
+    margin: 5% auto 0 auto;
+    vertical-align: middle;
+}
+
+.left-content {
+
+    padding: 20px;
+}
+
+.right-content {
+    border-left: solid 1px #ccc;
+    padding: 20px;
+}
+
+* {
+    list-style: none;
+}
