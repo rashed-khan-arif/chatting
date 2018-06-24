@@ -7,7 +7,7 @@
 <body>
 <div class="login-page">
     <div class="form">
-        <form class="register-form">
+        <form class="register-form" method="post">
             <input type="text" placeholder="Full Name"/>
             <input type="password" placeholder="Password"/>
             <input type="text" placeholder="Email Address"/>
@@ -15,10 +15,10 @@
             <button>create</button>
             <p class="message">Already registered? <a href="#">Sign In</a></p>
         </form>
-        <form class="login-form" action="page/home.jsp">
-            <input type="text" placeholder="Email"/>
-            <input type="password" placeholder="Password"/>
-            <button>login</button>
+        <form class="login-form" action="page/home.jsp"  method="post">
+            <input type="text" placeholder="Email" name="email"/>
+            <input type="password" placeholder="Password" id="pass" name="password"/>
+            <button id="login">login</button>
             <p class="message">Not registered? <a href="#">Create an account</a></p>
         </form>
     </div>
@@ -26,6 +26,13 @@
 <script>
     $('.message a').click(function () {
         $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
+    });
+    $('#login').click(function () {
+        var passLength = $('#pass').val();
+        if (passLength.length < 6) {
+            alert("Password length is too short !");
+            return false;
+        }
     });
 </script>
 </body>
