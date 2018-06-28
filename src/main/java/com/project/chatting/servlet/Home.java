@@ -1,6 +1,6 @@
 package com.project.chatting.servlet;
 
-import com.project.chatting.ws.Chat;
+import com.project.chatting.ws.ChatEndPoint;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,8 +14,6 @@ import java.io.IOException;
 public class Home extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        ServerEndpointConfig.Builder.create(Chat.class, "/echo").build();
 
     }
 }

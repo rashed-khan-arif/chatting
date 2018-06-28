@@ -15,12 +15,18 @@
             <button>create</button>
             <p class="message">Already registered? <a href="#">Sign In</a></p>
         </form>
-        <form class="login-form" action="page/home.jsp"  method="post">
+        <form class="login-form" action="page/home.jsp" method="post">
             <input type="text" placeholder="Email" name="email"/>
             <input type="password" placeholder="Password" id="pass" name="password"/>
             <button id="login">login</button>
             <p class="message">Not registered? <a href="#">Create an account</a></p>
         </form>
+        <textarea rows="10" cols="15" id="showTxt">
+
+        </textarea>
+        <input type="text" id="msg">
+        <button id="send" onclick="sendMessage(msg.value)">send</button>
+
     </div>
 </div>
 <script>
@@ -34,6 +40,41 @@
             return false;
         }
     });
+    var webSocket = new WebSocket("ws://localhost:8080/chat");
+    var show = document.getElementById("showTxt");
+    webSocket.onopen = function (ev) {
+        processOpen(ev);
+    };
+    webSocket.onclose = function (ev) {
+        processClose(ev);
+    };
+    webSocket.onmessage = function (ev) {
+        processMessage(ev);
+    };
+    webSocket.onerror = function (ev) {
+        processError(ev);
+    };
+
+    function processOpen(msg) {
+        show.value = "Server Opened : " + msg;
+    }
+
+    function processMessage(msg) {
+        show.value = "On Message : " + msg.data;
+    }
+
+    function processClose(msg) {
+        webSocket.send("client disconnected !");
+        show.value = "Server Closed : " + msg;
+    }
+
+    function processError(msg) {
+
+        show.value = "Connection Error: " + msg;
+    }
+    function sendMessage(data) {
+webSocket.send(data);
+    }
 </script>
 </body>
 </html>
