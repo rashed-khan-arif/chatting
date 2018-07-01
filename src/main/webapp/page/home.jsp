@@ -1,3 +1,4 @@
+<%@ page import="com.project.chatting.model.User" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,8 +9,9 @@
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
     <script src='../bootstrap/js/jquery.js'></script>
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
-    <link rel='stylesheet prefetch'  href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css'>
-    <link rel='stylesheet'  href='../assets/css/home.css'>
+    <link rel='stylesheet prefetch'
+          href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css'>
+    <link rel='stylesheet' href='../assets/css/home.css'>
 
 </head>
 <body>
@@ -20,7 +22,16 @@
         <div id="profile">
             <div class="wrap">
                 <img id="profile-img" src="../img/avt.png" class="online" alt=""/>
-                <p>Bayzid Islam</p>
+                <%
+                    User user = (User) session.getAttribute("user");
+                    if (user != null) {
+
+                %>
+                <p><%= user.getFull_name() %>
+                </p>
+                <%
+                    }
+                %>
             </div>
 
         </div>

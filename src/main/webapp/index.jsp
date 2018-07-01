@@ -1,3 +1,4 @@
+<%@ page import="com.project.chatting.model.User" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,8 +7,24 @@
 </head>
 <body>
 <div class="login-page">
+
     <div class="form">
-        <form class="register-form" method="post">
+
+        <%
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                response.sendRedirect("page/home.jsp");
+            }
+            String errorMsg = (String) session.getAttribute("errorMsg");
+            if (errorMsg != null) {
+        %>
+        <span style="color: red;">
+            <%= errorMsg %></span><br/><br/>
+        <%
+                session.removeAttribute("errorMsg");
+            }
+        %>
+        <form class="register-form" action="" method="post">
             <input type="text" placeholder="Full Name"/>
             <input type="password" placeholder="Password"/>
             <input type="text" placeholder="Email Address"/>
@@ -15,7 +32,7 @@
             <button>create</button>
             <p class="message">Already registered? <a href="#">Sign In</a></p>
         </form>
-        <form class="login-form" action="page/home.jsp" method="post">
+        <form class="login-form" action="page/login.jsp" method="post">
             <input type="text" placeholder="Email" name="email"/>
             <input type="password" placeholder="Password" id="pass" name="password"/>
             <button id="login">login</button>
@@ -72,8 +89,9 @@
 
         show.value = "Connection Error: " + msg;
     }
+
     function sendMessage(data) {
-webSocket.send(data);
+        webSocket.send(data);
     }
 </script>
 </body>
