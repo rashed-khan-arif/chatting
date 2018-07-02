@@ -1,28 +1,37 @@
 package com.project.chatting.model;
 
-public class User {
-    private int user_id;
-    private String full_name;
-    private String email;
-    private String image;
-    private int contact_number;
-    private int active;
+import com.project.chatting.core.ParseName;
 
+public class User {
+    @ParseName("user_id")
+    private int userId;
+    @ParseName("full_name")
+    private String fullName;
+    @ParseName("email")
+    private String email;
+    @ParseName("image")
+    private String image;
+    @ParseName("contact_number")
+    private int contactNumber;
+    @ParseName("active")
+    private int active;
+    @ParseName("password")
+    private String password;
 
     public int getUserId() {
-        return user_id;
+        return userId;
     }
 
     public void setUserId(int userId) {
-        this.user_id = userId;
+        this.userId = userId;
     }
 
-    public String getFull_name() {
-        return full_name;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setFull_name(String full_name) {
-        this.full_name = full_name;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getEmail() {
@@ -41,12 +50,12 @@ public class User {
         this.image = image;
     }
 
-    public int getContact_number() {
-        return contact_number;
+    public int getContactNumber() {
+        return contactNumber;
     }
 
-    public void setContact_number(int contact_number) {
-        this.contact_number = contact_number;
+    public void setContactNumber(int contactNumber) {
+        this.contactNumber = contactNumber;
     }
 
     public int getActive() {
@@ -55,5 +64,13 @@ public class User {
 
     public void setActive(int active) {
         this.active = active;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

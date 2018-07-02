@@ -2,12 +2,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Chatting</title>
     <meta charset='UTF-8'>
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700,300' rel='stylesheet'
           type='text/css'>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
     <script src='../bootstrap/js/jquery.js'></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+
     <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
     <link rel='stylesheet prefetch'
           href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css'>
@@ -15,23 +17,16 @@
 
 </head>
 <body>
-
-
 <div id="frame">
     <div id="sidepanel">
         <div id="profile">
             <div class="wrap">
                 <img id="profile-img" src="../img/avt.png" class="online" alt=""/>
-                <%
-                    User user = (User) session.getAttribute("user");
-                    if (user != null) {
-
-                %>
-                <p><%= user.getFull_name() %>
+                <% User user = (User) session.getAttribute("user");
+                    if (user != null) { %>
+                <p><%= user.getFullName() %>
                 </p>
-                <%
-                    }
-                %>
+                <% } %>
             </div>
 
         </div>
@@ -92,8 +87,41 @@
     </div>
 </div>
 <script>
-    function newMessage() {
+    var webSocket = new WebSocket("ws://localhost:8080/chat");
+    var show = document.getElementById("showTxt");
+    webSocket.onopen = function (ev) {
+        processOpen(ev);
+    };
+    webSocket.onclose = function (ev) {
+        processClose(ev);
+    };
+    webSocket.onmessage = function (ev) {
+        processMessage(ev);
+    };
+    webSocket.onerror = function (ev) {
+        processError(ev);
+    };
 
+    function processOpen(msg) {
+        var proImage = document.getElementById("profile-img");
+        proImage.style.borderColor="green";
+    }
+    function processMessage(msg) {
+        show.value = "On Message : " + msg.data;
+    }
+
+    function processClose(msg) {
+        webSocket.send("client disconnected !");
+        show.value = "Server Closed : " + msg;
+    }
+
+    function processError(msg) {
+
+        show.value = "Connection Error: " + msg;
+    }
+
+    function sendMessage(data) {
+        webSocket.send(data);
     }
 </script>
 </body>

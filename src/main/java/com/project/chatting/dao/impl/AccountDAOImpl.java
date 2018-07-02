@@ -1,7 +1,7 @@
 package com.project.chatting.dao.impl;
 
 import com.project.chatting.core.Database;
-import com.project.chatting.core.ResultParser;
+import com.project.chatting.core.Parser;
 import com.project.chatting.dao.AccountDAO;
 import com.project.chatting.model.User;
 
@@ -44,7 +44,7 @@ public class AccountDAOImpl implements AccountDAO {
             ps = (PreparedStatement) connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                user = ResultParser.parser(rs, User.class);
+                user = Parser.parser(rs, User.class);
             }
         } catch (SQLException e) {
             e.printStackTrace();
