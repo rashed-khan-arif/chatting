@@ -2,6 +2,8 @@ package com.project.chatting.model;
 
 import com.project.chatting.core.ParseName;
 
+import java.util.List;
+
 public class UserFriend {
     @ParseName("user_friend_id")
     private int userFriendId;
@@ -9,6 +11,8 @@ public class UserFriend {
     private int userId;
     @ParseName("friend_id")
     private int friendId;
+    private User user;
+    private User friend;
 
     public int getUserFriendId() {
         return userFriendId;
@@ -32,5 +36,22 @@ public class UserFriend {
 
     public void setFriendId(int friendId) {
         this.friendId = friendId;
+    }
+
+
+    public User getFriend() {
+        return friend;
+    }
+
+    public void setFriend(User friend) {
+        this.friend = friend;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -564,3 +564,17 @@ body {
 #frame .content .message-input .wrap button:focus {
     outline: none;
 }
+
+#home-page {
+    height: 100%;
+    position: relative }
+#home-page p {
+    font-size: 45px;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+
+}

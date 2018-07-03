@@ -10,7 +10,7 @@ public class User {
     @ParseName("email")
     private String email;
     @ParseName("image")
-    private String image;
+    private String image="img";
     @ParseName("contact_number")
     private int contactNumber;
     @ParseName("active")

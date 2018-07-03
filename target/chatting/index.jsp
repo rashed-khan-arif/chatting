@@ -4,16 +4,22 @@
 <head>
     <link rel="stylesheet" href="assets/css/login.css"/>
     <script src='bootstrap/js/jquery.js'></script>
+    <script src='assets/js/chatting.js'></script>
 </head>
+
+<%
+    User user = (User) session.getAttribute("user");
+    if (user != null) {
+        response.sendRedirect("page/home.jsp");
+    }
+%>
+
 <body>
 <div class="login-page">
 
     <div class="form">
         <%
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                response.sendRedirect("page/home.jsp");
-            }
+
             String errorMsg = (String) session.getAttribute("errorMsg");
             if (errorMsg != null) {
         %>
@@ -25,6 +31,7 @@
             <p id="show"></p><br/><br/>
             <input type="text" placeholder="Full Name" name="fullName" id="fullName"/>
             <input type="password" name="password" placeholder="Password" id="password"/>
+            <input type="password" placeholder="Confirm Password" id="cpassword"/>
             <input type="text" placeholder="Email Address" id="email" name="email"/>
             <input type="text" placeholder="Contact Number" id="contactNumber" name="contactNumber"/>
             <button id="create">create</button>
@@ -53,16 +60,35 @@
     $('#create').click(function () {
         var show = document.getElementById("show");
         var contactNumber = $('#contactNumber').val();
-        if ($('#fullName').val().trim().length === 0) {
+        var fullName = $('#fullName').val();
+        var email = $('#email').val();
+        var password = $('#password').val();
+        var cpassword = $('#cpassword').val();
+
+        if (fullName.trim().length <= 0) {
             show.innerHTML = "Full name is required !";
+
             return false;
         }
-        if ($('#email').val().trim().length === 0) {
-            show.innerHTML = "Email is required !";
+
+        if (email.trim().length <= 0 || !validateEmail(email)) {
+            show.innerHTML = "Please use a valid email address !";
+
             return false;
         }
-        if ($('#password').val().trim().length === 0) {
-            show.innerHTML = "Password is required !";
+        if (password.trim().length < 6) {
+            show.innerHTML = "Password at least 6 characters!";
+
+            return false;
+        }
+        if (cpassword.trim().length < 6) {
+            show.innerHTML = "Password at least 6 characters!";
+
+            return false;
+        }
+        if (cpassword.trim() !== password.trim()) {
+            show.innerHTML = "Confirm Password doesn't match !";
+
             return false;
         }
         if (isNaN(contactNumber)) {

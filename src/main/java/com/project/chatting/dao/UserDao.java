@@ -1,6 +1,7 @@
 package com.project.chatting.dao;
 
 import com.project.chatting.model.User;
+import com.project.chatting.model.UserFriend;
 
 import java.util.List;
 
@@ -11,6 +12,8 @@ public interface UserDao {
 
     User addUser(User user);
 
-    List<User> getFriendsByUserId(int userId);
+    boolean isEmailUnique(String email);
+
+    List<UserFriend> getFriendsByUserId(int userId);
 
 }
