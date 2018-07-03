@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 21, 2018 at 11:30 PM
+-- Generation Time: Jul 04, 2018 at 12:12 AM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 5.6.23
 
@@ -101,8 +101,21 @@ CREATE TABLE `user` (
   `email` varchar(40) NOT NULL,
   `image` text NOT NULL,
   `contact_number` int(16) NOT NULL,
-  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `active` tinyint(1) DEFAULT '1',
+  `password` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`user_id`, `full_name`, `email`, `image`, `contact_number`, `create_date`, `active`, `password`) VALUES
+(1, 'Rashed Khan', 'rashed@gmail.com', 'sds', 34535345, '2018-07-01 19:52:36', 1, 'e10adc3949ba59abbe56e057f20f883e'),
+(2, 'Saon Khan', 'saon@gmail.com', 'sdf', 4325353, '2018-07-02 16:31:33', 1, 'e10adc3949ba59abbe56e057f20f883e'),
+(3, 'Sakib', 'sk@gmail.com', 'df', 4535, '2018-07-02 16:31:33', 1, 'e10adc3949ba59abbe56e057f20f883e'),
+(4, 'Sharif', 'shr@gmail.com', 'eer', 435345, '2018-07-02 16:31:33', 1, 'e10adc3949ba59abbe56e057f20f883e'),
+(5, 'zahid islam', 'zahidrofique12@gmail.com', 'img', 1865336889, '2018-07-03 16:21:16', 1, 'e10adc3949ba59abbe56e057f20f883e');
 
 -- --------------------------------------------------------
 
@@ -117,6 +130,15 @@ CREATE TABLE `user_friend` (
   `request_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 . Requested 2. Accepted 3. Cancelled',
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `user_friend`
+--
+
+INSERT INTO `user_friend` (`user_friend_id`, `user_id`, `friend_id`, `request_status`, `create_date`) VALUES
+(1, 1, 2, 1, '2018-07-02 16:33:01'),
+(2, 1, 3, 1, '2018-07-02 16:33:01'),
+(3, 1, 4, 1, '2018-07-02 16:33:01');
 
 --
 -- Indexes for dumped tables
@@ -197,12 +219,12 @@ ALTER TABLE `room_member`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT for table `user_friend`
 --
 ALTER TABLE `user_friend`
-  MODIFY `user_friend_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `user_friend_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
