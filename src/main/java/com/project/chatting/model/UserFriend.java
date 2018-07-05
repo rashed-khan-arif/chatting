@@ -13,6 +13,8 @@ public class UserFriend {
     private int friendId;
     private User user;
     private User friend;
+    @ParseName("request_status")
+    private int requestStatus;
 
     public int getUserFriendId() {
         return userFriendId;
@@ -53,5 +55,17 @@ public class UserFriend {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public int getRequestStatus() {
+        return requestStatus;
+    }
+
+    public void setRequestStatus(int requestStatus) {
+        this.requestStatus = requestStatus;
+    }
+
+    public FriendRequestStatus getRequestStatus(int value) {
+        return FriendRequestStatus.intToEnum(value);
     }
 }
