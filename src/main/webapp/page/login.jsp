@@ -7,12 +7,16 @@
 <% String username = request.getParameter("email");
     String password = request.getParameter("password");
     AccountDAO accountDAO = new DAOImpl().getAccountDao();
-    User user = accountDAO.checkLoginInfo(username, password);
-    if (user != null) {
-        session.setAttribute("user", user);
-        response.sendRedirect("home.jsp");
-    } else {
-        session.setAttribute("errorMsg", "Invalid username or password !");
-        response.sendRedirect("../index.jsp");
+    try {
+        User user = accountDAO.checkLoginInfo(username, password);
+        if (user != null) {
+            session.setAttribute("user", user);
+            response.sendRedirect("home.jsp");
+        } else {
+            session.setAttribute("errorMsg", "Invalid username or password !");
+            response.sendRedirect("../index.jsp");
+        }
+    } catch (Exception ex) {
+        response.getOutputStream().println("Database Failed !");
     }
 %>
