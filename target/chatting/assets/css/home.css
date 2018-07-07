@@ -371,24 +371,24 @@ body {
 
 #frame .content {
     float: right;
-    width: 50%;
+    width: 70%;
     height: 100%;
     overflow: hidden;
     position: relative;
 }
 
-@media screen and (max-width: 735px) {
-    #frame .content {
-        width: calc(100% - 58px);
-        min-width: 300px !important;
-    }
-}
+/*@media screen and (max-width: 735px) {*/
+/*#frame .content {*/
+/*width: calc(100% - 58px);*/
+/*min-width: 300px !important;*/
+/*}*/
+/*}*/
 
-@media screen and (min-width: 900px) {
-    #frame .content {
-        width: calc(100% - 340px);
-    }
-}
+/*@media screen and (min-width: 900px) {*/
+/*#frame .content {*/
+/*width: calc(100% - 340px);*/
+/*}*/
+/*}*/
 
 #frame .content .contact-profile {
     width: 100%;
@@ -561,8 +561,90 @@ body {
 }
 
 #home-page {
-    height: 100%;
+    height: 90%;
     position: relative
+}
+
+#chat-area {
+    width: 100%;
+    height: 90%;
+}
+
+#nav-bar {
+    height: 10%;
+    position: relative;
+    background: #fff;
+    width: 100%;
+}
+
+#nav-menu {
+    margin: 0px;
+    padding: 15px;
+    position: relative;
+    float: right;
+    height: 100%;
+}
+
+#nav-menu li {
+    list-style-type: none;
+    float: left;
+    width: 40px;
+    text-align: center;
+    padding: 9px 0px;
+    cursor: pointer;
+
+}
+
+#nav-menu li:hover {
+    background: #dddddd;
+
+}
+
+#nav-menu li a {
+    color: white;
+    font-size: 12px;
+}
+
+#nav-menu li ul {
+    background-color: #E6E7E9;
+    cursor: pointer;
+    color: black;
+    margin-top: 10px;
+    visibility: hidden;
+    position: absolute;
+    z-index: 5;
+}
+
+#nav-menu li ul li {
+    width: 220px;
+    text-align: left;
+    float: none;
+    background-color: #D9DCE2;
+    overflow-wrap: break-word
+}
+
+#nav-menu li:hover ul {
+    left:0;
+    padding:0px;
+    right: -99.5%;
+}
+
+#nav-menu li ul li {
+    /*    background-color: #D9DCE2;*/
+    cursor: pointer;
+    color: black;
+    display: block;
+}
+
+#nav-menu li:hover ul li {
+    visibility: visible;
+    float: none;
+    border-top: 1px solid white;
+    padding-top: 15px;
+    padding-left: 4px;
+    margin-top: 0px;
+    width: 120px;
+
 }
 
 #home-page p {
@@ -602,4 +684,21 @@ body {
     left: 50%;
     margin-right: -50%;
     transform: translate(-50%, -50%);
+}
+
+.badge {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    line-height: 16px;
+    height: 16px;
+    padding: 0 5px;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-shadow: 0 1px rgba(0, 0, 0, 0.25);
+    border: 1px solid;
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.3), 0 1px 1px rgba(0, 0, 0, 0.08);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.3), 0 1px 1px rgba(0, 0, 0, 0.08);
 }

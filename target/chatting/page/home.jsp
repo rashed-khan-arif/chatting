@@ -1,5 +1,9 @@
 <%@ page import="com.project.chatting.model.User" %>
 <%@ page import="com.project.chatting.config.Config" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.project.chatting.model.UserFriend" %>
+<%@ page import="com.project.chatting.dao.impl.DAOImpl" %>
+<%@ page import="com.google.gson.Gson" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,22 +21,19 @@
     <% User user = (User) session.getAttribute("user");
         if (user == null) {
             response.sendRedirect("../index.jsp");
+            return;
         } %>
 </head>
 <body>
 <div id="frame">
     <div id="sidepanel">
-        <div style="padding: 10px 0 0 10px">
-            <p onclick="showFriendRequests()"><i class="fa fa-cog fa-user-friends"></i> Friend Requests </p>
-        </div>
         <div id="profile">
             <div class="wrap">
                 <img id="profile-img" src="../img/avt.png" class="online" alt=""/>
-                <%
-                    if (user != null) { %>
+
                 <p><%= user.getFullName() %>
                 </p><br/>
-                <% } %>
+
                 <p id="user-status"></p>
             </div>
         </div>
@@ -42,7 +43,19 @@
         </div>
         <div id="contacts">
             <ul style="margin-top: 5px" id="ul-contactList">
-
+                <%
+                    List<UserFriend> users = new DAOImpl().getFriendDao().getFriendsByUserId(user.getUserId());
+                    for (UserFriend uf : users) { %>
+                <li class="contact active" onclick="loadChatPage(true,<%=uf.getFriend().getUserId()%>)">
+                    <div class="wrap"><img src="../img/avt-2.png" alt=""/>
+                        <div class="meta"><p class="name"><%= uf.getFriend().getFullName() %>
+                        </p>
+                            <p class="preview"><%=uf.getFriend().getEmail() %>
+                            </p>
+                        </div>
+                    </div>
+                </li>
+                <%}%>
             </ul>
         </div>
         <div id="bottom-bar">
@@ -55,6 +68,21 @@
     </div>
     <div class="content">
         <%--<jsp:include page="chat_page.jsp"/>--%>
+
+        <div id="nav-bar">
+            <u id="nav-menu">
+                <li><i class="glyphicon glyphicon-user"></i>
+                    <ul id="friendList">
+
+                    </ul>
+                </li>
+                <li><span class="badge">4</span><i class="glyphicon glyphicon-bell"></i>
+                    <ul>
+
+                    </ul>
+                </li>
+            </u>
+        </div>
         <div id="home-page">
             <p class="text-center">Welcome to <br/><strong>TL</strong> <br/>Chat system</p>
         </div>
@@ -101,9 +129,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLongTitle">Add Friend</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+
             </div>
             <div class="modal-body ">
 
@@ -113,7 +139,6 @@
                            aria-describedby="emailHelp"
                            placeholder="Enter email">
                     <small id="emailHelp" class="form-text text-muted">
-                        A friend will send to the user if exits by this email !
                     </small>
                 </div>
                 <br/><br/>
@@ -125,7 +150,7 @@
             <script>
                 function sendRequest(data) {
                     var addContactApi = "<%= Config.addContactUrl%>";
-                    var userId = parseInt(<%= user==null?"0": user.getUserId()  %>);
+                    var userId = parseInt(<%=user.getUserId()%>);
                     jQuery.ajax({
                         url: addContactApi,
                         type: "POST",
@@ -147,7 +172,7 @@
 
 
 <script>
-    var webSocket = new WebSocket("ws://localhost:8080/chat");
+    var webSocket = new WebSocket("<%=Config.chatUrl%>");
     var show = document.getElementById("showTxt");
     webSocket.onopen = function (ev) {
         processOpen(ev);
@@ -167,29 +192,7 @@
         var userStatus = document.getElementById("user-status");
         proImage.style.borderColor = "green";
         userStatus.innerHTML = "Online";
-        var getContactApi = "http://localhost:8080/getContactList?userId=" +<%=user!=null?user.getUserId():""%>;
-        jQuery.ajax({
-            url: getContactApi,
-            type: "GET",
-            success: function (item) {
-                jQuery.each(item, function (key, value) {
-                    var list = $('#ul-contactList');
-                    var frnd = value['friend'];
-                    list.append("<li class=\"contact active\" onclick=\" + loadChatPage(true, frnd) \">\n" +
-                        "                    <div class=\"wrap\">\n" +
-                        "                        <img src=\"../img/avt-2.png\" alt=\"\"/>\n" +
-                        "                        <div class=\"meta\">\n" +
-                        "                            <p class=\"name\">" + value["friend"].fullName + "</p>\n" +
-                        "                            <p class=\"preview\">" + value["friend"].email + " </p>\n" +
-                        "                        </div>\n" +
-                        "                    </div>\n" +
-                        "                </li>");
-                });
-            },
-            error: function (xhr) {
-                console.error(xhr.responseText);
-            }
-        });
+        showFriendRequests();
     }
 
     function processMessage(msg) {
@@ -209,13 +212,11 @@
         webSocket.send(data);
     }
 
-    function loadChatPage(doLoad, friend) {
+    function loadChatPage(doLoad, friendId) {
         if (doLoad) {
             $("#chat-area").css("visibility", "visible");
             $("#home-page").css("display", "none");
-            $("#chat-title").innerHTML = friend.fullName;
-
-
+            getUserDetails(friendId);
         } else {
             $("#chat-area").css("visibility", "hidden");
             $("#home-page").css("display", "block");
@@ -223,7 +224,6 @@
     }
 
     function getMessages(userId) {
-
         var getMsgApi;
         jQuery.ajax({
             url: getMsgApi,
@@ -240,26 +240,39 @@
         });
     }
 
+    function getUserDetails(friendId) {
+        var getUser = "<%= Config.getUserUrl%>" + friendId;
+        jQuery.ajax({
+            url: getUser,
+            type: "GET",
+            success: function (item) {
+                var data = JSON.parse(item);
+
+                $("#chat-title").html(data["fullName"]);
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
     function showFriendRequests() {
-        var api = "<%= Config.friendRequestUrl%>";
-        var userId = parseInt(<%= user==null?"0": user.getUserId()  %>);
+        var userId = parseInt(<%= user.getUserId()%>);
+        var api = "<%= Config.friendRequestUrl%>" + userId;
         jQuery.ajax({
             url: api,
-            type: "GET", data: {"userId": userId},
+            type: "GET",
             success: function (item) {
-                $.each(item, function (key, value) {
-                    var list = $('#ul-contactList');
-                    var friendId = value['friendId'];
-                    list.append("<li class=\"contact active\" onclick=\" + showProfile(friendId) \">\n" +
-                        "                    <div class=\"wrap\">\n" +
-                        "                        <img src=\"../img/avt-2.png\" alt=\"\"/>\n" +
-                        "                        <div class=\"meta\">\n" +
-                        "                            <p class=\"name\">" + value["friend"].fullName + "</p>\n" +
-                        "                            <p class=\"preview\">" + value["friend"].email + " </p>\n" +
-                        "                            <p class=\"preview\"><a>Accept</a> </p>\n" +
-                        "                        </div>\n" +
-                        "                    </div>\n" +
-                        "                </li>");
+                var data = JSON.parse(item);
+                jQuery.each(data, function (key, value) {
+                    var list = $('#friendList');
+                    list.append(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left\" alt=\"\">\n" +
+                        "                            <p>" + value['user'].fullName + "</p>\n" +
+                        "                            <div style=\"\">\n" +
+                        "                                <p style=\"width: 50%; float: left\" onclick=\"acceptRequest("+value['userFriendId']+")\">Accept</p>\n" +
+                        "                                <p style=\"width: 50%;float: left\" onclick=\"acceptRequest("+value['userFriendId']+")\">Reject</p>\n" +
+                        "                            </div>\n" +
+                        "                        </li>");
                 });
             },
             error: function (xhr) {
@@ -272,6 +285,9 @@
 
     }
 
+    function acceptRequest(data) {
+
+    }
 
 </script>
 <script src='../bootstrap/js/jquery.js'></script>

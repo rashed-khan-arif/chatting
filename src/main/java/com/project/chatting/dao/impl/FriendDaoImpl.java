@@ -138,9 +138,9 @@ public class FriendDaoImpl implements IFriendDao {
         }
         UserDao userDao = new DAOImpl().getUserDao();
         for (UserFriend uf : userFriends) {
-            uf.setFriend(userDao.getUser(uf.getFriendId()));
-            if (uf.getFriend() != null)
-                uf.getFriend().setPassword(null);
+            uf.setUser(userDao.getUser(uf.getUserId()));
+            if (uf.getUser() != null)
+                uf.getUser().setPassword(null);
         }
         return userFriends;
     }

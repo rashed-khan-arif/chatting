@@ -4,6 +4,7 @@ import com.project.chatting.dao.Dao;
 import com.project.chatting.dao.UserDao;
 import com.project.chatting.dao.impl.DAOImpl;
 import com.project.chatting.model.FriendRequestStatus;
+import com.project.chatting.model.Notification;
 import com.project.chatting.model.User;
 import com.project.chatting.model.UserFriend;
 
@@ -54,7 +55,7 @@ public class AddContactServlet extends HttpServlet {
 
         if (!isSent) {
             resp.getOutputStream().println("Failed to send friend request !");
-        } else {
+        } else { 
             resp.getOutputStream().print("request send !");
         }
 
