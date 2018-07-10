@@ -181,7 +181,8 @@
         processClose(ev);
     };
     webSocket.onmessage = function (ev) {
-        processMessage(ev);
+        processMessage(ev.data);
+        console.log(ev.data);
     };
     webSocket.onerror = function (ev) {
         processError(ev);
@@ -196,7 +197,7 @@
     }
 
     function processMessage(msg) {
-        show.value = "On Message : " + msg.data;
+        console.log(msg);
     }
 
     function processClose(msg) {
@@ -223,22 +224,6 @@
         }
     }
 
-    function getMessages(userId) {
-        var getMsgApi;
-        jQuery.ajax({
-            url: getMsgApi,
-            type: "GET",
-            data: {"userId": userId},
-            success: function (item) {
-                jQuery.each(item, function (key, value) {
-
-                });
-            },
-            error: function (xhr) {
-                console.error(xhr.responseText);
-            }
-        });
-    }
 
     function getUserDetails(friendId) {
         var getUser = "<%= Config.getUserUrl%>" + friendId;

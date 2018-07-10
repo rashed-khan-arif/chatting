@@ -181,7 +181,8 @@
         processClose(ev);
     };
     webSocket.onmessage = function (ev) {
-        processMessage(ev);
+        processMessage(ev.data);
+        console.log(ev.data);
     };
     webSocket.onerror = function (ev) {
         processError(ev);
@@ -196,7 +197,7 @@
     }
 
     function processMessage(msg) {
-        show.value = "On Message : " + msg.data;
+        console.log(msg);
     }
 
     function processClose(msg) {
@@ -223,22 +224,6 @@
         }
     }
 
-    function getMessages(userId) {
-        var getMsgApi;
-        jQuery.ajax({
-            url: getMsgApi,
-            type: "GET",
-            data: {"userId": userId},
-            success: function (item) {
-                jQuery.each(item, function (key, value) {
-
-                });
-            },
-            error: function (xhr) {
-                console.error(xhr.responseText);
-            }
-        });
-    }
 
     function getUserDetails(friendId) {
         var getUser = "<%= Config.getUserUrl%>" + friendId;
@@ -270,7 +255,7 @@
                         "                            <p>" + value['user'].fullName + "</p>\n" +
                         "                            <div style=\"\">\n" +
                         "                                <p style=\"width: 50%; float: left\" onclick=\"acceptRequest("+value['userFriendId']+")\">Accept</p>\n" +
-                        "                                <p style=\"width: 50%;float: left\" onclick=\"acceptRequest("+value['userFriendId']+")\">Reject</p>\n" +
+                        "                                <p style=\"width: 50%;float: left\" onclick=\"rejectRequest("+value['userFriendId']+")\">Reject</p>\n" +
                         "                            </div>\n" +
                         "                        </li>");
                 });
@@ -285,7 +270,10 @@
 
     }
 
-    function acceptRequest(data) {
+    function acceptRequest(userFriendId) {
+
+    }
+    function rejectRequest(userFriendId) {
 
     }
 

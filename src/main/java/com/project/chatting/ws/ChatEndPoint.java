@@ -1,9 +1,15 @@
 package com.project.chatting.ws;
 
 
+import com.google.gson.Gson;
+import com.project.chatting.model.SocketEvent;
+import com.project.chatting.model.TLSMessage;
+import com.project.chatting.model.UserFriend;
+
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,11 +19,11 @@ import java.util.function.Consumer;
 
 @ServerEndpoint("/chat")
 public class ChatEndPoint {
-    static List<Session> sessions =new ArrayList<>();
+    static List<Session> sessions = new ArrayList<>();
+
     @OnOpen
     public void onOpen(Session session) throws IOException {
         sessions.add(session);
-        System.out.println(session.getId());
     }
 
     @OnMessage
@@ -26,7 +32,6 @@ public class ChatEndPoint {
             if (sess.isOpen())
                 sess.getBasicRemote().sendText(message);
         }
-        System.out.println(message);
     }
 
     @OnClose
@@ -39,10 +44,12 @@ public class ChatEndPoint {
     public void onError(Session session, Throwable throwable) {
         // Do error handling here
     }
+
     @OnMessage
     public void binaryMessage(Session session, ByteBuffer msg) {
         System.out.println("Binary message: " + msg.toString());
     }
+
     @OnMessage
     public void pongMessage(Session session, PongMessage msg) {
         System.out.println("Pong message: " +
