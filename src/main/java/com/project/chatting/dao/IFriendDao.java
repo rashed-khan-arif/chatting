@@ -8,9 +8,11 @@ import java.util.List;
 public interface IFriendDao {
     boolean isRequestAlreadySent(int userId, int friendId);
 
-    boolean sendRequest(UserFriend userFriend);
+    UserFriend sendRequest(UserFriend userFriend);
 
     List<UserFriend> getFriendsByUserId(int userId);
 
-    List<UserFriend> getFriendsRequests(int userId,FriendRequestStatus friendRequestStatus);
+    UserFriend getUserFriendRequest(int frnRqId);
+
+    List<UserFriend> getFriendsRequests(int userId, FriendRequestStatus friendRequestStatus);
 }

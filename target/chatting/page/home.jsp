@@ -147,32 +147,14 @@
                 </button>
 
             </div>
-            <script>
-                function sendRequest(data) {
-                    var addContactApi = "<%= Config.addContactUrl%>";
-                    var userId = parseInt(<%=user.getUserId()%>);
-                    jQuery.ajax({
-                        url: addContactApi,
-                        type: "POST",
-                        data: {'email': data, "userId": userId},
-                        success: function (item) {
-                            var msg = document.getElementById("emailHelp");
-                            $("#emailHelp").css("color", "red");
-                            msg.innerHTML = item;
-                        },
-                        error: function (xhr) {
-                            $("#emailHelp").innerHTML = xhr;
-                        }
-                    });
-                }
-            </script>
+
         </div>
     </div>
 </div>
 
 
 <script>
-    var webSocket = new WebSocket("<%=Config.chatUrl%>");
+    var webSocket = new WebSocket("<%=Config.chatUrl+user.getUserId()%>");
     var show = document.getElementById("showTxt");
     webSocket.onopen = function (ev) {
         processOpen(ev);
@@ -198,6 +180,18 @@
 
     function processMessage(msg) {
         console.log(msg);
+        var data=JSON.parse(msg);
+        switch (data['eventId']) {
+            case 1:
+                bindFriendRequest((data['data']));
+                return;
+            case 2:
+                return;
+            case 3:
+                return;
+            default:
+                return;
+        }
     }
 
     function processClose(msg) {
@@ -249,13 +243,13 @@
             type: "GET",
             success: function (item) {
                 var data = JSON.parse(item);
+                var list = $('#friendList');
                 jQuery.each(data, function (key, value) {
-                    var list = $('#friendList');
                     list.append(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left\" alt=\"\">\n" +
                         "                            <p>" + value['user'].fullName + "</p>\n" +
                         "                            <div style=\"\">\n" +
-                        "                                <p style=\"width: 50%; float: left\" onclick=\"acceptRequest("+value['userFriendId']+")\">Accept</p>\n" +
-                        "                                <p style=\"width: 50%;float: left\" onclick=\"rejectRequest("+value['userFriendId']+")\">Reject</p>\n" +
+                        "                                <p style=\"width: 50%; float: left\" onclick=\"acceptRequest(" + value['userFriendId'] + ")\">Accept</p>\n" +
+                        "                                <p style=\"width: 50%;float: left\" onclick=\"rejectRequest(" + value['userFriendId'] + ")\">Reject</p>\n" +
                         "                            </div>\n" +
                         "                        </li>");
                 });
@@ -273,11 +267,42 @@
     function acceptRequest(userFriendId) {
 
     }
+
     function rejectRequest(userFriendId) {
 
     }
 
+    function bindFriendRequest(value) {
+        var list = $('#friendList');
+        list.append(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left\" alt=\"\">\n" +
+            "                            <p>" + value['user'].fullName + "</p>\n" +
+            "                            <div style=\"\">\n" +
+            "                                <p style=\"width: 50%; float: left\" onclick=\"acceptRequest(" + value['userFriendId'] + ")\">Accept</p>\n" +
+            "                                <p style=\"width: 50%;float: left\" onclick=\"rejectRequest(" + value['userFriendId'] + ")\">Reject</p>\n" +
+            "                            </div>\n" +
+            "                        </li>");
+    }
+
+    function sendRequest(data) {
+        var addContactApi = "<%= Config.addContactUrl%>";
+        var userId = parseInt(<%=user.getUserId()%>);
+        jQuery.ajax({
+            url: addContactApi,
+            type: "POST",
+            data: {'email': data, "userId": userId},
+            success: function (item) {
+                var msg = document.getElementById("emailHelp");
+                $("#emailHelp").css("color", "red");
+                msg.innerHTML = item;
+            },
+            error: function (xhr) {
+                $("#emailHelp").innerHTML = xhr;
+            }
+        });
+    }
+
 </script>
+
 <script src='../bootstrap/js/jquery.js'></script>
 <script src="../bootstrap/js/bootstrap.min.js"></script>
 </body>

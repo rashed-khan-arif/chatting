@@ -1,12 +1,11 @@
 package com.project.chatting.servlet;
 
+import com.google.gson.Gson;
 import com.project.chatting.dao.Dao;
 import com.project.chatting.dao.UserDao;
 import com.project.chatting.dao.impl.DAOImpl;
-import com.project.chatting.model.FriendRequestStatus;
-import com.project.chatting.model.Notification;
-import com.project.chatting.model.User;
-import com.project.chatting.model.UserFriend;
+import com.project.chatting.model.*;
+import com.project.chatting.ws.ChatEndPoint;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -37,26 +36,33 @@ public class AddContactServlet extends HttpServlet {
             return;
         }
         Dao dao = new DAOImpl();
-        User user = dao.getUserDao().getUserByEmail(email);
-        if (user == null) {
+        User friend = dao.getUserDao().getUserByEmail(email);
+        if (friend == null) {
             resp.getOutputStream().println("No user found for this email address !");
             return;
         }
         UserFriend friendReq = new UserFriend();
-        friendReq.setFriendId(user.getUserId());
+        friendReq.setFriendId(friend.getUserId());
         friendReq.setUserId(userId);
         friendReq.setRequestStatus(FriendRequestStatus.Requested.val);
-        boolean isAlreadySent = dao.getFriendDao().isRequestAlreadySent(userId, user.getUserId());
+        boolean isAlreadySent = dao.getFriendDao().isRequestAlreadySent(userId, friend.getUserId());
         if (isAlreadySent) {
             resp.getOutputStream().println("You already send a friend a friend request to this user  !");
             return;
         }
-        boolean isSent = dao.getFriendDao().sendRequest(friendReq);
+        UserFriend friendRequest = dao.getFriendDao().sendRequest(friendReq);
 
-        if (!isSent) {
+        if (friendRequest == null) {
             resp.getOutputStream().println("Failed to send friend request !");
-        } else { 
+        } else {
             resp.getOutputStream().print("request send !");
+            ChatEndPoint chatEndPoint = ChatEndPoint.getClient(String.valueOf(friend.getUserId()));
+            if (chatEndPoint != null) {
+                TLSMessage msg = new TLSMessage();
+                msg.setEventId(SocketEvent.FriendRequest.value);
+                msg.setData(friendRequest);
+                chatEndPoint.sendMessage(new Gson().toJson(msg));
+            }
         }
 
     }

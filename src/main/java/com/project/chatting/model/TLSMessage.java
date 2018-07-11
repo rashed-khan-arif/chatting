@@ -1,23 +1,14 @@
 package com.project.chatting.model;
 
 public class TLSMessage {
-    private int msgId;
-    private String data;
+    private Object data;
     private int eventId;
 
-    public int getMsgId() {
-        return msgId;
-    }
-
-    public void setMsgId(int msgId) {
-        this.msgId = msgId;
-    }
-
-    public String getData() {
+    public Object getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public void setData(Object data) {
         this.data = data;
     }
 
@@ -28,4 +19,6 @@ public class TLSMessage {
     public void setEventId(int eventId) {
         this.eventId = eventId;
     }
+
+
 }

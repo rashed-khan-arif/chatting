@@ -1,5 +1,6 @@
 package com.project.chatting.dao.impl;
 
+import com.mysql.jdbc.Statement;
 import com.project.chatting.core.Database;
 import com.project.chatting.core.Parser;
 import com.project.chatting.dao.IFriendDao;
@@ -49,16 +50,23 @@ public class FriendDaoImpl implements IFriendDao {
     }
 
     @Override
-    public boolean sendRequest(UserFriend userFriend) {
+    public UserFriend sendRequest(UserFriend userFriend) {
         PreparedStatement ps = null;
+        UserFriend userFr = null;
         try {
             String query = "INSERT INTO user_friend(user_id,friend_id,request_status) VALUES (?,?,?)";
             ps = connection.prepareStatement(query);
             ps.setInt(1, userFriend.getUserId());
             ps.setInt(2, userFriend.getFriendId());
             ps.setInt(3, userFriend.getRequestStatus());
-            int userId = ps.executeUpdate();
-            return userId > 0;
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            int userFrnId = 0;
+            if (rs.next()) {
+                userFrnId = rs.getInt(1);
+            }
+            if (userFrnId != 0)
+                userFr = getUserFriendRequest(userFrnId);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -70,7 +78,7 @@ public class FriendDaoImpl implements IFriendDao {
                 }
             }
         }
-        return false;
+        return userFr;
     }
 
     @Override
@@ -79,7 +87,7 @@ public class FriendDaoImpl implements IFriendDao {
         List<UserFriend> userFriends = new ArrayList<>();
         try {
             String query = "select * from user_friend " +
-                    "where user_id='" + userId + "' ";
+                    "where user_id='" + userId + "' and request_status=" + FriendRequestStatus.Accepted.val;
             ps = (PreparedStatement) connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             UserFriend userFriend = null;
@@ -145,4 +153,38 @@ public class FriendDaoImpl implements IFriendDao {
         return userFriends;
     }
 
+    @Override
+    public UserFriend getUserFriendRequest(int frnRqId) {
+        PreparedStatement ps = null;
+        UserFriend userFriend = null;
+        try {
+            String query = "select * from user_friend " +
+                    "where user_friend_id=" + frnRqId;
+            ps = (PreparedStatement) connection.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                userFriend = Parser.parser(rs, UserFriend.class);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (userFriend != null) {
+            UserDao userDao = new DAOImpl().getUserDao();
+            userFriend.setFriend(userDao.getUser(userFriend.getFriendId()));
+            userFriend.setUser(userDao.getUser(userFriend.getUserId()));
+            if (userFriend.getFriend() != null)
+                userFriend.getFriend().setPassword(null);
+            if (userFriend.getUser() != null)
+                userFriend.getUser().setPassword(null);
+        }
+        return userFriend;
+    }
 }
