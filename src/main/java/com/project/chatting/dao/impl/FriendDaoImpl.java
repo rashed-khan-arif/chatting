@@ -82,12 +82,38 @@ public class FriendDaoImpl implements IFriendDao {
     }
 
     @Override
+    public UserFriend updateRequestStatus(int userFriendId, FriendRequestStatus status) {
+        PreparedStatement ps = null;
+        UserFriend userFr = null;
+        try {
+            String query = "UPDATE user_friend SET request_status=? WHERE user_friend_id=?";
+            ps = connection.prepareStatement(query);
+            ps.setInt(1, status.val);
+            ps.setInt(2, userFriendId);
+            ps.executeUpdate();
+            userFr = getUserFriendRequest(userFriendId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return userFr;
+    }
+
+    @Override
     public List<UserFriend> getFriendsByUserId(int userId) {
         PreparedStatement ps = null;
         List<UserFriend> userFriends = new ArrayList<>();
         try {
             String query = "select * from user_friend " +
-                    "where user_id='" + userId + "' and request_status=" + FriendRequestStatus.Accepted.val;
+                    "where  user_id='" + userId + "' or friend_id='" + userId + "' HAVING request_status='" + FriendRequestStatus.Accepted.val + "'";
             ps = (PreparedStatement) connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             UserFriend userFriend = null;
@@ -109,6 +135,7 @@ public class FriendDaoImpl implements IFriendDao {
         UserDao userDao = new DAOImpl().getUserDao();
         for (UserFriend uf : userFriends) {
             uf.setFriend(userDao.getUser(uf.getFriendId()));
+            uf.setUser(userDao.getUser(uf.getUserId()));
             if (uf.getFriend() != null)
                 uf.getFriend().setPassword(null);
             if (uf.getUser() != null)

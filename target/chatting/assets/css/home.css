@@ -613,6 +613,9 @@ body {
     visibility: hidden;
     position: absolute;
     z-index: 5;
+    left: -113px;
+    padding: 0px;
+    right: -99.5%;
 }
 
 #nav-menu li ul li {
@@ -620,12 +623,14 @@ body {
     text-align: left;
     float: none;
     background-color: #D9DCE2;
-    overflow-wrap: break-word
+    overflow-wrap: break-word;
+    border-bottom: solid 1px #ccc;
+
 }
 
 #nav-menu li:hover ul {
-    left:0;
-    padding:0px;
+    left: -113px;
+    padding: 0px;
     right: -99.5%;
 }
 
@@ -638,13 +643,17 @@ body {
 
 #nav-menu li:hover ul li {
     visibility: visible;
+    width: 221px;
+    text-align: left;
     float: none;
-    border-top: 1px solid white;
-    padding-top: 15px;
-    padding-left: 4px;
-    margin-top: 0px;
-    width: 120px;
+    background-color: #D9DCE2;
+    overflow-wrap: break-word;
+    height: auto;
+    border-bottom: solid 1px #ccc;
+}
 
+#nav-menu li:hover ul li:hover {
+    background-color: #FFFFFF;
 }
 
 #home-page p {

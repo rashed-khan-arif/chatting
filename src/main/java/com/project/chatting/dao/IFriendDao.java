@@ -10,6 +10,8 @@ public interface IFriendDao {
 
     UserFriend sendRequest(UserFriend userFriend);
 
+    UserFriend updateRequestStatus(int userFriendId, FriendRequestStatus status);
+
     List<UserFriend> getFriendsByUserId(int userId);
 
     UserFriend getUserFriendRequest(int frnRqId);

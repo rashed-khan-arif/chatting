@@ -4,6 +4,7 @@
 <%@ page import="com.project.chatting.model.UserFriend" %>
 <%@ page import="com.project.chatting.dao.impl.DAOImpl" %>
 <%@ page import="com.google.gson.Gson" %>
+<%@ page import="com.project.chatting.model.FriendRequestStatus" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -45,12 +46,20 @@
             <ul style="margin-top: 5px" id="ul-contactList">
                 <%
                     List<UserFriend> users = new DAOImpl().getFriendDao().getFriendsByUserId(user.getUserId());
-                    for (UserFriend uf : users) { %>
-                <li class="contact active" onclick="loadChatPage(true,<%=uf.getFriend().getUserId()%>)">
+                    for (UserFriend uf : users) {
+                        User friend = null;
+                        if (uf.getUserId() == user.getUserId()) {
+                            friend = uf.getFriend();
+                        }
+                        if (uf.getFriendId() == user.getUserId()) {
+                            friend = uf.getUser();
+                        }
+                %>
+                <li class="contact active" onclick="loadChatPage(true,<%=friend!=null?friend.getUserId():0 %>)">
                     <div class="wrap"><img src="../img/avt-2.png" alt=""/>
-                        <div class="meta"><p class="name"><%= uf.getFriend().getFullName() %>
+                        <div class="meta"><p class="name"><%= friend != null ? friend.getFullName() : "" %>
                         </p>
-                            <p class="preview"><%=uf.getFriend().getEmail() %>
+                            <p class="preview"><%= friend != null ? friend.getEmail() : "" %>
                             </p>
                         </div>
                     </div>
@@ -63,7 +72,7 @@
                     data-target="#addContact"><i class="fa fa-user-plus fa-fw"></i>
                 <span>Add Friend</span>
             </button>
-            <button id="settings"><i class="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Settings</span></button>
+            <button id="settings"><i class="fa fa-logout fa-fw" aria-hidden="true"></i> <span>Log out</span></button>
         </div>
     </div>
     <div class="content">
@@ -71,13 +80,15 @@
 
         <div id="nav-bar">
             <u id="nav-menu">
-                <li><i class="glyphicon glyphicon-user"></i>
+                <li><span id="friendlist-badge"
+                          style="box-shadow: inset 0 1px rgba(255, 255, 255, 0.3), 0 1px 1px rgba(0, 0, 0, 0.08);">4</span><i
+                        class="glyphicon glyphicon-user"></i>
                     <ul id="friendList">
 
                     </ul>
                 </li>
-                <li><span class="badge">4</span><i class="glyphicon glyphicon-bell"></i>
-                    <ul>
+                <li><span id="notify-badge" class="badge">4</span><i class="glyphicon glyphicon-bell"></i>
+                    <ul id="notifications">
 
                     </ul>
                 </li>
@@ -176,16 +187,18 @@
         proImage.style.borderColor = "green";
         userStatus.innerHTML = "Online";
         showFriendRequests();
+        showNotifications();
     }
 
     function processMessage(msg) {
         console.log(msg);
-        var data=JSON.parse(msg);
+        var data = JSON.parse(msg);
         switch (data['eventId']) {
             case 1:
-                bindFriendRequest((data['data']));
+                bindFriendRequest(data['data']);
                 return;
             case 2:
+                bindNotification(data['data']);
                 return;
             case 3:
                 return;
@@ -245,12 +258,34 @@
                 var data = JSON.parse(item);
                 var list = $('#friendList');
                 jQuery.each(data, function (key, value) {
-                    list.append(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left\" alt=\"\">\n" +
+                    list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left\" alt=\"\">\n" +
                         "                            <p>" + value['user'].fullName + "</p>\n" +
                         "                            <div style=\"\">\n" +
-                        "                                <p style=\"width: 50%; float: left\" onclick=\"acceptRequest(" + value['userFriendId'] + ")\">Accept</p>\n" +
-                        "                                <p style=\"width: 50%;float: left\" onclick=\"rejectRequest(" + value['userFriendId'] + ")\">Reject</p>\n" +
+                        "                                <p style=\"width: 50%; float: left\" onclick=\"updateRequest(" + value['userFriendId'] + ",<%= FriendRequestStatus.Accepted.val%>)\">Accept</p>\n" +
+                        "                                <p style=\"width: 50%;float: left\" onclick=\"updateRequest(" + value['userFriendId'] + ",<%= FriendRequestStatus.Cancelled.val%>)\">Reject</p>\n" +
                         "                            </div>\n" +
+                        "                        </li>");
+                });
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
+    function showNotifications() {
+        var userId = parseInt(<%= user.getUserId()%>);
+        var api = "<%= Config.getNotificationsUrl%>" + userId;
+        jQuery.ajax({
+            url: api,
+            type: "GET",
+            success: function (item) {
+                var data = JSON.parse(item);
+                var list = $('#notifications');
+                jQuery.each(data, function (key, value) {
+                    list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left;margin-right: 5px\" alt=\"\">\n" +
+                        "                            <p style='font-size: 14px;padding: 5px'>" + value['content'] + "</p>\n" +
+                        "                            <p style='font-size: 12px;padding: 5px'>" + value['notifyDate'] + "</p>\n" +
                         "                        </li>");
                 });
             },
@@ -264,23 +299,40 @@
 
     }
 
-    function acceptRequest(userFriendId) {
-
-    }
-
-    function rejectRequest(userFriendId) {
-
+    function updateRequest(userFriendId, status) {
+        var statusUpdate = "<%= Config.updateFriendReq%>";
+        jQuery.ajax({
+            url: statusUpdate,
+            type: "POST",
+            data: {'userFriendId': userFriendId, "status": status},
+            success: function (item) {
+            },
+            error: function (xhr) {
+            }
+        });
     }
 
     function bindFriendRequest(value) {
         var list = $('#friendList');
-        list.append(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left\" alt=\"\">\n" +
+        var badge= $('#friendlist-badge');
+        var badgeTxt =badge.html();
+        badge.html(badgeTxt + 1);
+        list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"40px\" height=\"40px\" style=\"float: left\" alt=\"\">\n" +
             "                            <p>" + value['user'].fullName + "</p>\n" +
             "                            <div style=\"\">\n" +
             "                                <p style=\"width: 50%; float: left\" onclick=\"acceptRequest(" + value['userFriendId'] + ")\">Accept</p>\n" +
             "                                <p style=\"width: 50%;float: left\" onclick=\"rejectRequest(" + value['userFriendId'] + ")\">Reject</p>\n" +
             "                            </div>\n" +
             "                        </li>");
+    }
+
+    function bindNotification(value) {
+        var list = $('#notifications');
+        list.prepend("<li><div><img src=\"../img/avt-2.png\" width=\"40px\" height=\"40px\" style=\"float: left;margin-right: 5px\" alt=\"\">\n" +
+
+            "                            <p style='font-size: 12px;padding: 5px'>" + value['content'] + "</p>\n" +
+            "                            <p style='font-size: 10px;padding: 5px'>" + value['notifyDate'] + "</p>\n" +
+            "                       </div> </li> ");
     }
 
     function sendRequest(data) {
