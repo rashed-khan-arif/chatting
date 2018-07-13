@@ -80,14 +80,13 @@
 
         <div id="nav-bar">
             <u id="nav-menu">
-                <li><span id="friendlist-badge"
-                          style="box-shadow: inset 0 1px rgba(255, 255, 255, 0.3), 0 1px 1px rgba(0, 0, 0, 0.08);">4</span><i
+                <li><span id="friendlist-badge" class="badge" style="right: 50px;!important;">0</span><i
                         class="glyphicon glyphicon-user"></i>
                     <ul id="friendList">
 
                     </ul>
                 </li>
-                <li><span id="notify-badge" class="badge">4</span><i class="glyphicon glyphicon-bell"></i>
+                <li><span id="notify-badge" class="badge">0</span><i class="glyphicon glyphicon-bell"></i>
                     <ul id="notifications">
 
                     </ul>
@@ -257,20 +256,23 @@
             success: function (item) {
                 var data = JSON.parse(item);
                 var list = $('#friendList');
+
+                var badge = $('#friendlist-badge');
+                badge.text(JSON.parse(item).length);
+
                 jQuery.each(data, function (key, value) {
-                    list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left\" alt=\"\">\n" +
-                        "                            <p>" + value['user'].fullName + "</p>\n" +
-                        "                            <div style=\"\">\n" +
-                        "                                <p style=\"width: 50%; float: left\" onclick=\"updateRequest(" + value['userFriendId'] + ",<%= FriendRequestStatus.Accepted.val%>)\">Accept</p>\n" +
-                        "                                <p style=\"width: 50%;float: left\" onclick=\"updateRequest(" + value['userFriendId'] + ",<%= FriendRequestStatus.Cancelled.val%>)\">Reject</p>\n" +
-                        "                            </div>\n" +
+                    list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"40px\" height=\"40px\" style=\"float: left;margin-right: 5px\" alt=\"\">\n" +
+                        "                            <p style='font-size: 14px;padding: 5px'>" + value['user'].fullName + "</p>\n" +
+                        "                            <span style='font-size: 12px;padding: 5px' onclick='updateRequest(" + value['userFriendId'] + " ,<%= FriendRequestStatus.Accepted.val%>)'>Accept </span>" +
+                        "                            <span style='font-size: 12px;padding: 5px' onclick='updateRequest(" + value['userFriendId'] + ",<%= FriendRequestStatus.Cancelled.val%>)'>Reject </span>" +
                         "                        </li>");
                 });
             },
             error: function (xhr) {
                 console.error(xhr.responseText);
             }
-        });
+        })
+        ;
     }
 
     function showNotifications() {
@@ -282,8 +284,10 @@
             success: function (item) {
                 var data = JSON.parse(item);
                 var list = $('#notifications');
+                var badge = $('#notify-badge');
+                badge.text(data.length);
                 jQuery.each(data, function (key, value) {
-                    list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"50px\" height=\"50px\" style=\"float: left;margin-right: 5px\" alt=\"\">\n" +
+                    list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"40px\" height=\"40px\" style=\"float: left;margin-right: 5px\" alt=\"\">\n" +
                         "                            <p style='font-size: 14px;padding: 5px'>" + value['content'] + "</p>\n" +
                         "                            <p style='font-size: 12px;padding: 5px'>" + value['notifyDate'] + "</p>\n" +
                         "                        </li>");
@@ -306,6 +310,7 @@
             type: "POST",
             data: {'userFriendId': userFriendId, "status": status},
             success: function (item) {
+                showFriendRequests();
             },
             error: function (xhr) {
             }
@@ -314,20 +319,23 @@
 
     function bindFriendRequest(value) {
         var list = $('#friendList');
-        var badge= $('#friendlist-badge');
-        var badgeTxt =badge.html();
-        badge.html(badgeTxt + 1);
-        list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"40px\" height=\"40px\" style=\"float: left\" alt=\"\">\n" +
-            "                            <p>" + value['user'].fullName + "</p>\n" +
-            "                            <div style=\"\">\n" +
-            "                                <p style=\"width: 50%; float: left\" onclick=\"acceptRequest(" + value['userFriendId'] + ")\">Accept</p>\n" +
-            "                                <p style=\"width: 50%;float: left\" onclick=\"rejectRequest(" + value['userFriendId'] + ")\">Reject</p>\n" +
-            "                            </div>\n" +
+        var badge = $('#friendlist-badge');
+        var badgeTxt = parseInt(badge.text(), 10);
+        badge.text(badgeTxt + 1);
+        playNotificationTon();
+        list.prepend(" <li> <img src=\"../img/avt-2.png\" width=\"40px\" height=\"40px\" style=\"float: left;margin-right: 5px\" alt=\"\">\n" +
+            "                            <p style='font-size: 14px;padding: 5px'>" + value['user'].fullName + "</p>\n" +
+            "                            <span style='font-size: 12px;padding: 5px' onclick='updateRequest(" + value['userFriendId'] + " ,<%= FriendRequestStatus.Accepted.val%>)'>Accept </span>" +
+            "                            <span style='font-size: 12px;padding: 5px' onclick='updateRequest(" + value['userFriendId'] + ",<%= FriendRequestStatus.Cancelled.val%>)'>Reject </span>" +
             "                        </li>");
     }
 
     function bindNotification(value) {
         var list = $('#notifications');
+        var badge = $('#notify-badge');
+        var badgeTxt = badge.text();
+        badge.text(parseInt(badgeTxt, 10) + 1);
+        playNotificationTon();
         list.prepend("<li><div><img src=\"../img/avt-2.png\" width=\"40px\" height=\"40px\" style=\"float: left;margin-right: 5px\" alt=\"\">\n" +
 
             "                            <p style='font-size: 12px;padding: 5px'>" + value['content'] + "</p>\n" +
@@ -353,8 +361,16 @@
         });
     }
 
+    function playNotificationTon() {
+        var audio = document.getElementById("audio");
+        audio.play();
+    } function playMessageTon() {
+        var audio = document.getElementById("msg-audio");
+        audio.play();
+    }
 </script>
-
+<audio id="audio" src="../assets/ton/notification_tone.mp3"></audio>
+<audio id="msg-audio" src="../assets/ton/message_tone.mp3"></audio>
 <script src='../bootstrap/js/jquery.js'></script>
 <script src="../bootstrap/js/bootstrap.min.js"></script>
 </body>
