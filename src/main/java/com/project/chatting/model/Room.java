@@ -2,6 +2,8 @@ package com.project.chatting.model;
 
 import com.project.chatting.core.ParseName;
 
+import java.util.List;
+
 public class Room {
     @ParseName("room_id")
     private int roomId;
@@ -9,6 +11,8 @@ public class Room {
     private String roomName;
     @ParseName("active")
     private int active;
+
+    private List<Member> members;
 
     public Room(int roomId, String roomName, int active) {
         this.roomId = roomId;
@@ -41,5 +45,21 @@ public class Room {
 
     public void setActive(int active) {
         this.active = active;
+    }
+
+    public List<Member> getMembers() {
+        return members;
+    }
+
+    public boolean isUserExitsInRoom(int userId) {
+        for (Member rc : members) {
+            if (rc.getUserId() == userId)
+                return true;
+        }
+        return false;
+    }
+
+    public void setMembers(List<Member> members) {
+        this.members = members;
     }
 }

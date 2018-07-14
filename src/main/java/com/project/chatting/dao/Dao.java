@@ -8,4 +8,6 @@ public interface Dao {
     IFriendDao getFriendDao();
 
     NotificationDao getNotificationDao();
+
+    MessageDao getMessageDao();
 }

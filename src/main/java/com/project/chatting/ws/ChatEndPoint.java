@@ -2,9 +2,9 @@ package com.project.chatting.ws;
 
 
 import com.google.gson.Gson;
-import com.project.chatting.model.SocketEvent;
-import com.project.chatting.model.TLSMessage;
-import com.project.chatting.model.UserFriend;
+import com.project.chatting.data.IMessageProcessor;
+import com.project.chatting.data.MessageProcessor;
+import com.project.chatting.model.*;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
@@ -33,11 +33,20 @@ public class ChatEndPoint {
 
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
-//        for (ChatEndPoint clients : clients) {
-//            if (clients.currentSession.isOpen()) {
-//                clients.currentSession.getBasicRemote().sendText(message);
-//            }
-//        }
+        TLSMessage smsg = new Gson().fromJson(message, TLSMessage.class);
+        if (smsg.getEventId() == SocketEvent.SendMsg.value) {
+            MessageItem item = (MessageItem) smsg.getData();
+            Message sentMsg = MessageProcessor.getInstance().processMessage(item);
+            if (sentMsg != null) {
+                for (ChatEndPoint client : clients) {
+                    if (sentMsg.getRoom().isUserExitsInRoom(Integer.parseInt(client.userId)) && client.currentSession.isOpen()) {
+                        smsg.setEventId(SocketEvent.TextMessage.value);
+                        smsg.setData(sentMsg);
+                        client.currentSession.getBasicRemote().sendText(new Gson().toJson(smsg));
+                    }
+                }
+            }
+        }
     }
 
     @OnClose

@@ -22,4 +22,9 @@ public class DAOImpl implements Dao {
     public NotificationDao getNotificationDao() {
         return new NotificationDaoImpl();
     }
+
+    @Override
+    public MessageDao getMessageDao() {
+        return new MessageDaoImpl();
+    }
 }

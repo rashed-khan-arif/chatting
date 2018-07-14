@@ -165,7 +165,7 @@ ALTER TABLE `room`
 --
 -- Indexes for table `room_connection`
 --
-ALTER TABLE `room_connection`
+ALTER TABLE member
   ADD PRIMARY KEY (`connection_id`);
 
 --
@@ -208,7 +208,7 @@ ALTER TABLE `room`
 --
 -- AUTO_INCREMENT for table `room_connection`
 --
-ALTER TABLE `room_connection`
+ALTER TABLE member
   MODIFY `connection_id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `room_member`

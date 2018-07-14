@@ -100,8 +100,10 @@
             <div class="contact-profile">
                 <img src="../img/avt-3.png" alt=""/>
                 <p id="chat-title"></p>
-                <span class="glyphicon glyphicon-remove-sign pull-right" style="margin: 20px 20px 0 0"
+                <span class="glyphicon glyphicon-remove-sign pull-right" style="margin: 20px 20px 0 0; cursor: pointer"
                       onclick="loadChatPage(false,null)"></span>
+                <span class="pull-right" style="margin-right: 10px"><i class="fa fa-user-plus fa-fw"></i> Add </span>
+
             </div>
             <div class="messages">
                 <ul>
@@ -131,6 +133,19 @@
     </div>
     <div id="rightPanel">
 
+        <div class="wrap">
+            <p>Recent</p>
+            <br/>
+            <div>
+                <ul style="margin-top: 5px" id="ul-messageList">
+                    <li><img src="../img/avt-2.png" width="40px" height="40px"
+                             style="float: left;margin-left:10px;margin-right: 5px" alt="">
+                        <p style='font-size: 14px;padding: 5px;text-align: left'>Rashed Khan Arif</p>
+                        <p style='font-size: 12px;padding: 5px;text-align: left'>sdkfjskdfjsdf</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal fade" id="addContact" tabindex="-1" role="dialog" aria-labelledby="addContact"
@@ -365,8 +380,14 @@
         var audio = document.getElementById("audio");
         audio.play();
     }
+
+    function playMessageTon() {
+        var audio = document.getElementById("msg-audio");
+        audio.play();
+    }
 </script>
 <audio id="audio" src="../assets/ton/notification_tone.mp3"></audio>
+<audio id="msg-audio" src="../assets/ton/message_tone.mp3"></audio>
 <script src='../bootstrap/js/jquery.js'></script>
 <script src="../bootstrap/js/bootstrap.min.js"></script>
 </body>
