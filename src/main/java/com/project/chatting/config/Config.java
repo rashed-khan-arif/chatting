@@ -11,6 +11,7 @@ public class Config {
     public static String friendRequestUrl = hostUrl.concat("getFriendRequest?userId=");
     public static String updateFriendReq = hostUrl.concat("updateFriendRequest");
     public static String getNotificationsUrl = hostUrl.concat("getNotifications?userId=");
+    public static String getUserMessageUrl = hostUrl.concat("getMessages?");
 
 
 }

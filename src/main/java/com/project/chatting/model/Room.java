@@ -11,7 +11,8 @@ public class Room {
     private String roomName;
     @ParseName("active")
     private int active;
-
+    @ParseName("created_by")
+    private int createdBy;
     private List<Member> members;
 
     public Room(int roomId, String roomName, int active) {
@@ -61,5 +62,13 @@ public class Room {
 
     public void setMembers(List<Member> members) {
         this.members = members;
+    }
+
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(int createdBy) {
+        this.createdBy = createdBy;
     }
 }

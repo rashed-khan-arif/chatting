@@ -102,24 +102,13 @@
                 <p id="chat-title"></p>
                 <span class="glyphicon glyphicon-remove-sign pull-right" style="margin: 20px 20px 0 0; cursor: pointer"
                       onclick="loadChatPage(false,null)"></span>
-                <span class="pull-right" style="margin-right: 10px;cursor:pointer;"><i class="fa fa-user-plus fa-fw"></i> Add </span>
+                <span class="pull-right" style="margin-right: 10px;cursor:pointer;"><i
+                        class="fa fa-user-plus fa-fw"></i> Add </span>
 
             </div>
             <div class="messages">
-                <ul>
-                    <li class="sent">
-                        <img src="../img/avt.png" alt=""/>
-                        <p>Hello salam how are you ? how is you days going ? mine is fine .</p>
-                    </li>
-                    <li class="replies">
-                        <img src="../img/avt-2.png" alt=""/>
-                        <p>Yeah it's good . Spending a silent charming moment with my partner.</p>
-                    </li>
-                    <li class="sent">
-                        <img src="../img/avt-3.png" alt=""/>
-                        <p>That's good .</p>
-                    </li>
-
+                <ul id="msgList">
+                    <!-- meesageList will bind here-->
                 </ul>
             </div>
             <div class="message-input">
@@ -181,6 +170,7 @@
 <script>
     var webSocket = new WebSocket("<%=Config.chatUrl+user.getUserId()%>");
     var show = document.getElementById("showTxt");
+    var currentChatId = 0;
     webSocket.onopen = function (ev) {
         processOpen(ev);
     };
@@ -235,32 +225,65 @@
     }
 
     function loadChatPage(doLoad, friendId) {
+        if (currentChatId === friendId) {
+            return;
+        }
         if (doLoad) {
+            var myNode = document.getElementById("msgList");
+            while (myNode.firstChild) {
+                myNode.removeChild(myNode.firstChild);
+            }
             $("#chat-area").css("visibility", "visible");
             $("#home-page").css("display", "none");
             getUserDetails(friendId);
         } else {
             $("#chat-area").css("visibility", "hidden");
             $("#home-page").css("display", "block");
+            currentChatId=0;
         }
     }
 
 
     function getUserDetails(friendId) {
+        currentChatId = friendId;
         var getUser = "<%= Config.getUserUrl%>" + friendId;
         jQuery.ajax({
             url: getUser,
             type: "GET",
             success: function (item) {
                 var data = JSON.parse(item);
-
                 $("#chat-title").html(data["fullName"]);
+                getMessages("<%= user.getUserId()%>", friendId, 0);
             },
             error: function (xhr) {
                 console.error(xhr.responseText);
             }
         });
     }
+
+    function getMessages(userId, friendId, roomId) {
+        var getMsg = "<%= Config.getUserMessageUrl%>" + "member1=" + userId + "&member2=" + friendId + "&roomId=" + roomId;
+        jQuery.ajax({
+            url: getMsg,
+            type: "GET",
+            success: function (item) {
+                var msg = JSON.parse(item);
+                var msgList = $("#msgList");
+                jQuery.each(msg, function (key, value) {
+                    var userId = <%= user.getUserId()%>;
+                    var className = userId === value["userId"] ? "replies" : "sent";
+                    msgList.prepend(" <li class='" + className + "'>\n" +
+                        "                        <img src=\"../img/avt.png\" alt=\"\"/>\n" +
+                        "                    <p> " + value['messageContent'] + "</p>\n" +
+                        "                    </li>");
+                });
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+
 
     function showFriendRequests() {
         var userId = parseInt(<%= user.getUserId()%>);

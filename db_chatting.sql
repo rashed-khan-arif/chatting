@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 04, 2018 at 12:12 AM
+-- Generation Time: Jul 15, 2018 at 10:12 PM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 5.6.23
 
@@ -23,16 +23,47 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `members`
+--
+
+CREATE TABLE `members` (
+  `connection_id` int(11) NOT NULL,
+  `room_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL COMMENT '(invited or joining request user id)',
+  `connection_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 . Invited 2. RequestJoin 3. CancellInvited 4. CancellJoiningRequest',
+  `connection_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `members`
+--
+
+INSERT INTO `members` (`connection_id`, `room_id`, `user_id`, `connection_status`, `connection_date`) VALUES
+(1, 1, 5, 1, '2018-07-15 18:18:39'),
+(2, 1, 4, 1, '2018-07-15 18:18:39'),
+(3, 1, 3, 0, '2018-07-15 18:20:44');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `message`
 --
 
 CREATE TABLE `message` (
   `message_id` int(11) NOT NULL,
   `room_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
   `message_content` text NOT NULL,
-  `msg_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `msg_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `message`
+--
+
+INSERT INTO `message` (`message_id`, `room_id`, `message_content`, `msg_date`, `user_id`) VALUES
+(1, 1, 'hello', '2018-07-15 18:31:01', 5),
+(2, 1, 'yes', '2018-07-15 19:35:50', 4);
 
 -- --------------------------------------------------------
 
@@ -48,6 +79,17 @@ CREATE TABLE `notification` (
   `notify_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `notification`
+--
+
+INSERT INTO `notification` (`notify_id`, `to_user`, `title`, `content`, `notify_date`) VALUES
+(1, 5, 'Friend Request Accepted', 'Sakib Accepted your request!', '2018-07-12 17:58:15'),
+(2, 5, 'Friend Request Accepted', 'Saon Khan Accepted your request!', '2018-07-12 18:00:00'),
+(3, 1, 'Friend Request Cancelled', 'Saon Khan Cancelled your friend request!', '2018-07-12 18:00:00'),
+(4, 4, 'Friend Request Accepted', 'zahid islam Accepted your friend request!', '2018-07-13 18:00:00'),
+(5, 4, 'Friend Request Accepted', 'zahid islam Accepted your friend request!', '2018-07-13 18:00:00');
+
 -- --------------------------------------------------------
 
 --
@@ -62,32 +104,12 @@ CREATE TABLE `room` (
   `active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `room_connection`
+-- Dumping data for table `room`
 --
 
-CREATE TABLE `room_connection` (
-  `connection_id` int(11) NOT NULL,
-  `room_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL COMMENT '(invited or joining request user id)',
-  `connection_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 . Invited 2. RequestJoin 3. CancellInvited 4. CancellJoiningRequest',
-  `connection_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `room_member`
---
-
-CREATE TABLE `room_member` (
-  `room_member_id` int(11) NOT NULL,
-  `room_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `join_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+INSERT INTO `room` (`room_id`, `room_name`, `created_date`, `created_by`, `active`) VALUES
+(1, 'Test', '2018-07-15 18:18:11', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -127,7 +149,7 @@ CREATE TABLE `user_friend` (
   `user_friend_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `friend_id` int(11) NOT NULL,
-  `request_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 . Requested 2. Accepted 3. Cancelled',
+  `request_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 . Requested 2. Accepted 3. Cancelled  4. Sent',
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -136,13 +158,20 @@ CREATE TABLE `user_friend` (
 --
 
 INSERT INTO `user_friend` (`user_friend_id`, `user_id`, `friend_id`, `request_status`, `create_date`) VALUES
-(1, 1, 2, 1, '2018-07-02 16:33:01'),
-(2, 1, 3, 1, '2018-07-02 16:33:01'),
-(3, 1, 4, 1, '2018-07-02 16:33:01');
+(32, 5, 3, 2, '2018-07-12 16:29:36'),
+(33, 5, 2, 2, '2018-07-12 18:34:06'),
+(34, 1, 2, 3, '2018-07-12 18:41:46'),
+(51, 4, 5, 2, '2018-07-13 20:03:17');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `members`
+--
+ALTER TABLE `members`
+  ADD PRIMARY KEY (`connection_id`);
 
 --
 -- Indexes for table `message`
@@ -163,18 +192,6 @@ ALTER TABLE `room`
   ADD PRIMARY KEY (`room_id`);
 
 --
--- Indexes for table `room_connection`
---
-ALTER TABLE member
-  ADD PRIMARY KEY (`connection_id`);
-
---
--- Indexes for table `room_member`
---
-ALTER TABLE `room_member`
-  ADD PRIMARY KEY (`room_member_id`);
-
---
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
@@ -191,40 +208,35 @@ ALTER TABLE `user_friend`
 --
 
 --
+-- AUTO_INCREMENT for table `members`
+--
+ALTER TABLE `members`
+  MODIFY `connection_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+--
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message`
-  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notify_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `notify_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `room`
 --
 ALTER TABLE `room`
-  MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT;
---
--- AUTO_INCREMENT for table `room_connection`
---
-ALTER TABLE member
-  MODIFY `connection_id` int(11) NOT NULL AUTO_INCREMENT;
---
--- AUTO_INCREMENT for table `room_member`
---
-ALTER TABLE `room_member`
-  MODIFY `room_member_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `user_friend`
 --
 ALTER TABLE `user_friend`
-  MODIFY `user_friend_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `user_friend_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

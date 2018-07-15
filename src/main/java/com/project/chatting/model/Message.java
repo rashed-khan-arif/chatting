@@ -13,6 +13,8 @@ public class Message {
     private String messageContent;
     @ParseName("msg_date")
     private Date msgDate;
+    @ParseName("user_id")
+    private int userId;
     private Room room;
 
     public int getMessageId() {
@@ -56,4 +58,11 @@ public class Message {
         this.room = room;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 }

@@ -11,7 +11,7 @@ public interface MessageDao {
 
     Room createRoom(Room room);
 
-    void addMemberToRoom(Member member);
+    Member addMemberToRoom(Member member);
 
     Room getRoom(int roomId);
 
@@ -20,4 +20,6 @@ public interface MessageDao {
     List<Message> getMessageList(int userId);
 
     List<Message> getMessageByRoom(int roomId);
+
+    List<Message> getRecentMessage(int userId);
 }
