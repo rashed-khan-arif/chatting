@@ -13,11 +13,17 @@ public interface MessageDao {
 
     Member addMemberToRoom(Member member);
 
+    Member getMember(int memberId);
+
+    List<Member> getMembers(int roomId);
+
     Room getRoom(int roomId);
 
     Message addMessage(Message msg);
 
     List<Message> getMessageList(int userId);
+
+    Message getMessage(int msgId);
 
     List<Message> getMessageByRoom(int roomId);
 

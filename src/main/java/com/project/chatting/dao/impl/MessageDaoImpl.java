@@ -26,7 +26,7 @@ public class MessageDaoImpl implements MessageDao {
         Room room = null;
         List<Member> members = new ArrayList<>();
         try {
-            String query = "select * from members where  user_id= ? or user_id= ? and connection_status = ? ";
+            String query = "select * from members where  user_id= ? or user_id= ? and connection_status = ?";
             ps = (PreparedStatement) connection.prepareStatement(query);
             ps.setInt(1, from);
             ps.setInt(2, to);
@@ -73,7 +73,7 @@ public class MessageDaoImpl implements MessageDao {
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
-                newRoom = Parser.parser(rs, Room.class);
+                newRoom = getRoom(rs.getInt(1));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -102,7 +102,7 @@ public class MessageDaoImpl implements MessageDao {
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
-                newMember = Parser.parser(rs, Member.class);
+                newMember = getMember(rs.getInt(1));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -140,7 +140,41 @@ public class MessageDaoImpl implements MessageDao {
                 }
             }
         }
+        if (room != null) {
+            room.setMembers(getMembers(roomId));
+        }
         return room;
+    }
+
+    @Override
+    public List<Member> getMembers(int roomId) {
+        PreparedStatement ps = null;
+        List<Member> members = new ArrayList<>();
+        try {
+            String query = "select * from members where room_id=" + roomId + " ORDER by room_id DESC ";
+            ps = connection.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Member member;
+                member = Parser.parser(rs, Member.class);
+                members.add(member);
+            }
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return members;
     }
 
     @Override
@@ -156,7 +190,7 @@ public class MessageDaoImpl implements MessageDao {
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
-                newMsg = Parser.parser(rs, Message.class);
+                newMsg = getMessage(rs.getInt(1));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -169,6 +203,9 @@ public class MessageDaoImpl implements MessageDao {
                 }
             }
         }
+        if (newMsg != null) {
+            newMsg.setRoom(getRoom(newMsg.getRoomId()));
+        }
         return newMsg;
     }
 
@@ -177,8 +214,7 @@ public class MessageDaoImpl implements MessageDao {
         PreparedStatement ps = null;
         List<Message> messages = new ArrayList<>();
         try {
-            String query = "select * from message where user_id=" + userId + " ORDER by message_id DESC ";
-            ;
+            String query = "select * from message where user_id=" + userId + " ORDER by message_id DESC limit 20";
             ps = connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -204,12 +240,70 @@ public class MessageDaoImpl implements MessageDao {
     }
 
     @Override
+    public Message getMessage(int msgId) {
+        PreparedStatement ps = null;
+        Message message = null;
+        try {
+            String query = "select * from message where message_id=? ";
+            ps = connection.prepareStatement(query);
+            ps.setInt(1, msgId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                message = Parser.parser(rs, Message.class);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (message != null) {
+            message.setRoom(getRoom(message.getRoomId()));
+        }
+        return message;
+    }
+
+    @Override
+    public Member getMember(int memberId) {
+        PreparedStatement ps = null;
+        Member member = null;
+        try {
+            String query = "select * from members where connection_id=? ";
+            ps = connection.prepareStatement(query);
+            ps.setInt(1, memberId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                member = Parser.parser(rs, Member.class);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (member != null) {
+            member.setRoom(getRoom(member.getRoomId()));
+        }
+        return member;
+    }
+
+    @Override
     public List<Message> getMessageByRoom(int roomId) {
 
         PreparedStatement ps = null;
         List<Message> messages = new ArrayList<>();
         try {
-            String query = "select * from message where room_id=" + roomId + " ORDER by message_id DESC ";
+            String query = "select * from message where room_id=" + roomId + " ORDER by message_id DESC limit 20 ";
             ps = connection.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -239,7 +333,7 @@ public class MessageDaoImpl implements MessageDao {
         PreparedStatement ps = null;
         List<Message> messages = new ArrayList<>();
         try {
-            String query = "select * from message as m left JOIN room as r on m.room_id=r.room_id LEFT JOIN members as mb on r.room_id=mb.room_id where mb.user_id=? ORDER by m.message_id DESC LIMIT 20 ";
+            String query = "select * from message as m left JOIN room as r on m.room_id=r.room_id LEFT JOIN members as mb on r.room_id=mb.room_id where mb.user_id=? ORDER by m.message_id ASC LIMIT 20 ";
             ps = connection.prepareStatement(query);
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();

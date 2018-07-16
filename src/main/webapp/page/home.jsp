@@ -100,6 +100,7 @@
             <div class="contact-profile">
                 <img src="../img/avt-3.png" alt=""/>
                 <p id="chat-title"></p>
+                <input type="hidden" id="roomId">
                 <span class="glyphicon glyphicon-remove-sign pull-right" style="margin: 20px 20px 0 0; cursor: pointer"
                       onclick="loadChatPage(false,null)"></span>
                 <span class="pull-right" style="margin-right: 10px;cursor:pointer;"><i
@@ -113,7 +114,8 @@
             </div>
             <div class="message-input">
                 <div class="wrap">
-                    <input type="text" placeholder="Write your message..."/>
+                    <input type="text" id="txtMessage" onkeyup="generateMessage(event)"
+                           placeholder="Write your message..."/>
                     <i class="fa fa-paperclip attachment" aria-hidden="true"></i>
                     <button class="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
                 </div>
@@ -186,12 +188,23 @@
     };
 
     function processOpen(msg) {
+        showOnline();
+        showFriendRequests();
+        showNotifications();
+    }
+
+    function showOnline() {
         var proImage = document.getElementById("profile-img");
         var userStatus = document.getElementById("user-status");
         proImage.style.borderColor = "green";
         userStatus.innerHTML = "Online";
-        showFriendRequests();
-        showNotifications();
+    }
+
+    function showOffline() {
+        var proImage = document.getElementById("profile-img");
+        var userStatus = document.getElementById("user-status");
+        proImage.style.borderColor = "red";
+        userStatus.innerHTML = "Offline";
     }
 
     function processMessage(msg) {
@@ -205,6 +218,8 @@
                 bindNotification(data['data']);
                 return;
             case 3:
+                playMessageTon();
+                processTextMessage(data['data'], false);
                 return;
             default:
                 return;
@@ -212,17 +227,20 @@
     }
 
     function processClose(msg) {
-        webSocket.send("client disconnected !");
+        showOffline();
         show.value = "Server Closed : " + msg;
     }
 
     function processError(msg) {
         show.value = "Connection Error: " + msg;
+
     }
+
 
     function sendMessage(data) {
         webSocket.send(data);
     }
+
 
     function loadChatPage(doLoad, friendId) {
         if (currentChatId === friendId) {
@@ -239,7 +257,7 @@
         } else {
             $("#chat-area").css("visibility", "hidden");
             $("#home-page").css("display", "block");
-            currentChatId=0;
+            currentChatId = 0;
         }
     }
 
@@ -268,14 +286,12 @@
             type: "GET",
             success: function (item) {
                 var msg = JSON.parse(item);
-                var msgList = $("#msgList");
+                if (msg.length > 0) {
+                    $('#roomId').val(msg[0]['roomId']);
+                }
+
                 jQuery.each(msg, function (key, value) {
-                    var userId = <%= user.getUserId()%>;
-                    var className = userId === value["userId"] ? "replies" : "sent";
-                    msgList.prepend(" <li class='" + className + "'>\n" +
-                        "                        <img src=\"../img/avt.png\" alt=\"\"/>\n" +
-                        "                    <p> " + value['messageContent'] + "</p>\n" +
-                        "                    </li>");
+                    processTextMessage(value, true);
                 });
             },
             error: function (xhr) {
@@ -284,6 +300,22 @@
         });
     }
 
+
+    function processTextMessage(value, multiple) {
+        var msgList = $("#msgList");
+        var userId = <%= user.getUserId()%>;
+        var className = userId === value["userId"] ? "replies" : "sent";
+        var htmlVal = " <li class='" + className + "'>\n" +
+            "                        <img src=\"../img/avt.png\" alt=\"\"/>\n" +
+            "                    <p> " + decodeURI(value['messageContent']) + "</p>\n" +
+            "                    </li>"
+        if (multiple) {
+            msgList.prepend(htmlVal);
+        } else {
+            msgList.append(htmlVal);
+        }
+        $(".messages").animate({scrollTop: $(document).height()}, "fast");
+    }
 
     function showFriendRequests() {
         var userId = parseInt(<%= user.getUserId()%>);
@@ -309,8 +341,7 @@
             error: function (xhr) {
                 console.error(xhr.responseText);
             }
-        })
-        ;
+        });
     }
 
     function showNotifications() {
@@ -408,6 +439,28 @@
         var audio = document.getElementById("msg-audio");
         audio.play();
     }
+</script>
+<script>
+    function generateMessage(event) {
+        if (event.keyCode === 13) {
+            var txt = $("#txtMessage");
+            var content=txt.val();
+            var data = {
+                "roomId": $("#roomId").val(),
+                "fromUserId":<%= user.getUserId()%>,
+                "toUserId": 0,
+                "content": encodeURI(content)
+            };
+            var msg = {
+                "eventId": 4,
+                "data": data
+            };
+            var messageData = JSON.stringify(msg);
+            sendMessage(messageData);
+            txt.val(null);
+        }
+    }
+
 </script>
 <audio id="audio" src="../assets/ton/notification_tone.mp3"></audio>
 <audio id="msg-audio" src="../assets/ton/message_tone.mp3"></audio>

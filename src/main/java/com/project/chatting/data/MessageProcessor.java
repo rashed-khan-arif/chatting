@@ -58,6 +58,7 @@ public class MessageProcessor implements IMessageProcessor {
             message.setRoomId(messageItem.getRoomId());
             message.setMessageContent(messageItem.getContent());
             message.setMsgDate(new Date());
+            message.setUserId(messageItem.getFromUserId());
             sentMessage = send(message);
         }
         return sentMessage;

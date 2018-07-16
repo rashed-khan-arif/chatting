@@ -33,20 +33,26 @@ public class ChatEndPoint {
 
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
-        TLSMessage smsg = new Gson().fromJson(message, TLSMessage.class);
-        if (smsg.getEventId() == SocketEvent.SendMsg.value) {
-            MessageItem item = (MessageItem) smsg.getData();
-            Message sentMsg = MessageProcessor.getInstance().processMessage(item);
-            if (sentMsg != null) {
-                for (ChatEndPoint client : clients) {
-                    if (sentMsg.getRoom().isUserExitsInRoom(Integer.parseInt(client.userId)) && client.currentSession.isOpen()) {
-                        smsg.setEventId(SocketEvent.TextMessage.value);
-                        smsg.setData(sentMsg);
-                        client.currentSession.getBasicRemote().sendText(new Gson().toJson(smsg));
+        new Thread(() -> {
+            TLSMessage smsg = new Gson().fromJson(message, TLSMessage.class);
+            if (smsg.getEventId() == SocketEvent.SendMsg.value) {
+                MessageItem item = new Gson().fromJson(smsg.getData().toString(), MessageItem.class);
+                try {
+                    Message sentMsg = MessageProcessor.getInstance().processMessage(item);
+                    if (sentMsg != null) {
+                        for (ChatEndPoint client : clients) {
+                            if (sentMsg.getRoom().isUserExitsInRoom(Integer.parseInt(client.userId)) && client.currentSession.isOpen()) {
+                                smsg.setEventId(SocketEvent.TextMessage.value);
+                                smsg.setData(sentMsg);
+                                client.currentSession.getBasicRemote().sendText(new Gson().toJson(smsg));
+                            }
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-        }
+        }).start();
     }
 
     @OnClose
