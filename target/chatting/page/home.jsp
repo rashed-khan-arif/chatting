@@ -5,6 +5,7 @@
 <%@ page import="com.project.chatting.dao.impl.DAOImpl" %>
 <%@ page import="com.google.gson.Gson" %>
 <%@ page import="com.project.chatting.model.FriendRequestStatus" %>
+<%@ page import="com.project.chatting.model.Message" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,7 +56,7 @@
                             friend = uf.getUser();
                         }
                 %>
-                <li class="contact active" onclick="loadChatPage(true,<%=friend!=null?friend.getUserId():0 %>)">
+                <li class="contact active" onclick="loadChatPage(true,<%=friend!=null?friend.getUserId():0 %>,null)">
                     <div class="wrap"><img src="../img/avt-2.png" alt=""/>
                         <div class="meta"><p class="name"><%= friend != null ? friend.getFullName() : "" %>
                         </p>
@@ -68,11 +69,12 @@
             </ul>
         </div>
         <div id="bottom-bar">
-            <button aria-hidden="true" data-toggle="modal"
-                    data-target="#addContact"><i class="fa fa-user-plus fa-fw"></i>
+            <button aria-hidden="true" data-toggle="modal" data-target="#addContact"><i
+                    class="fa fa-user-plus fa-fw"></i>
                 <span>Add Friend</span>
             </button>
-            <button id="settings"><i class="fa fa-logout fa-fw" aria-hidden="true"></i> <span>Log out</span></button>
+            <button id="settings"><i class="fa fa-logout fa-fw" aria-hidden="true" onclick="logOut()"></i>
+                <span>Log Out</span></button>
         </div>
     </div>
     <div class="content">
@@ -100,10 +102,11 @@
             <div class="contact-profile">
                 <img src="../img/avt-3.png" alt=""/>
                 <p id="chat-title"></p>
-                <input type="hidden" id="roomId">
+                <input type="hidden" value="0" id="roomId">
                 <span class="glyphicon glyphicon-remove-sign pull-right" style="margin: 20px 20px 0 0; cursor: pointer"
-                      onclick="loadChatPage(false,null)"></span>
-                <span class="pull-right" style="margin-right: 10px;cursor:pointer;"><i
+                      onclick="loadChatPage(false,null,null)"></span>
+                <span aria-hidden="true" data-toggle="modal" data-target="#addContactToChat" class="pull-right"
+                      style="margin-right: 10px;cursor:pointer;"><i
                         class="fa fa-user-plus fa-fw"></i> Add </span>
 
             </div>
@@ -116,8 +119,7 @@
                 <div class="wrap">
                     <input type="text" id="txtMessage" onkeyup="generateMessage(event)"
                            placeholder="Write your message..."/>
-                    <i class="fa fa-paperclip attachment" aria-hidden="true"></i>
-                    <button class="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+
                 </div>
             </div>
         </div>
@@ -129,11 +131,23 @@
             <br/>
             <div>
                 <ul style="margin-top: 5px" id="ul-messageList">
-                    <li><img src="../img/avt-2.png" width="40px" height="40px"
+                    <%
+                        List<Message> messages = new DAOImpl().getMessageDao().getRecentMessage(user.getUserId());
+                        for (Message mg : messages) {
+                            String room = new Gson().toJson(mg.getRoom());
+                    %>
+                    <script>
+                        var room<%=mg.getRoomId()%> =<%=room%>;
+                    </script>
+                    <li onclick="loadChatPage(true,0,room<%=mg.getRoomId()%>)">
+                        <img src="../img/avt-2.png" width="40px" height="40px"
                              style="float: left;margin-left:10px;margin-right: 5px" alt="">
-                        <p style='font-size: 14px;padding: 5px;text-align: left'>Rashed Khan Arif</p>
-                        <p style='font-size: 12px;padding: 5px;text-align: left'>sdkfjskdfjsdf</p>
+                        <p style='font-size: 14px;padding: 5px;text-align: left'><%=mg.getRoom().getRoomName()%>
+                        </p>
+                        <p style='font-size: 12px;padding: 5px;text-align: left'><%=mg.getMessageContent()%>
+                        </p>
                     </li>
+                    <%}%>
                 </ul>
             </div>
         </div>
@@ -168,11 +182,36 @@
     </div>
 </div>
 
+<div class="modal fade" id="addContactToChat" tabindex="-1" role="dialog" aria-labelledby="addContact"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addContactToChatModal">Add Friend</h5></div>
+            <div class="modal-body ">
+                <div class="form-group">
+                    <label for="email">Email address of your friend </label><br/><br/>
+                    <input type="email" name="emailAddress" class="form-control" id="cemail"
+                           aria-describedby="contactEmailHelp"
+                           placeholder="Enter email">
+                    <small id="contactEmailHelp" class="form-text text-muted"></small>
+                </div>
+                <br/><br/>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" onclick="addToGroupRequest(cemail.value)">Add</button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 <script>
     var webSocket = new WebSocket("<%=Config.chatUrl+user.getUserId()%>");
     var show = document.getElementById("showTxt");
     var currentChatId = 0;
+    var currentRoomId = 0;
     webSocket.onopen = function (ev) {
         processOpen(ev);
     };
@@ -242,22 +281,41 @@
     }
 
 
-    function loadChatPage(doLoad, friendId) {
-        if (currentChatId === friendId) {
-            return;
-        }
-        if (doLoad) {
-            var myNode = document.getElementById("msgList");
-            while (myNode.firstChild) {
-                myNode.removeChild(myNode.firstChild);
+    function loadChatPage(doLoad, friendId, room) {
+        var myNode = document.getElementById("msgList");
+        if (room !== null && room['roomId'] !== 0) {
+            if (currentRoomId === room['roomId']) {
+                return;
             }
-            $("#chat-area").css("visibility", "visible");
-            $("#home-page").css("display", "none");
-            getUserDetails(friendId);
+            if (doLoad) {
+                while (myNode.firstChild) {
+                    myNode.removeChild(myNode.firstChild);
+                }
+                $("#chat-area").css("visibility", "visible");
+                $("#home-page").css("display", "none");
+                currentRoomId = room['roomId'];
+                getMessages(0, 0, room['roomId'], false);
+            } else {
+                $("#chat-area").css("visibility", "hidden");
+                $("#home-page").css("display", "block");
+                currentRoomId = 0;
+            }
         } else {
-            $("#chat-area").css("visibility", "hidden");
-            $("#home-page").css("display", "block");
-            currentChatId = 0;
+            if (currentChatId === friendId) {
+                return;
+            }
+            if (doLoad) {
+                while (myNode.firstChild) {
+                    myNode.removeChild(myNode.firstChild);
+                }
+                $("#chat-area").css("visibility", "visible");
+                $("#home-page").css("display", "none");
+                getUserDetails(friendId);
+            } else {
+                $("#chat-area").css("visibility", "hidden");
+                $("#home-page").css("display", "block");
+                currentChatId = 0;
+            }
         }
     }
 
@@ -271,7 +329,7 @@
             success: function (item) {
                 var data = JSON.parse(item);
                 $("#chat-title").html(data["fullName"]);
-                getMessages("<%= user.getUserId()%>", friendId, 0);
+                getMessages("<%= user.getUserId()%>", friendId, 0, true);
             },
             error: function (xhr) {
                 console.error(xhr.responseText);
@@ -279,17 +337,14 @@
         });
     }
 
-    function getMessages(userId, friendId, roomId) {
-        var getMsg = "<%= Config.getUserMessageUrl%>" + "member1=" + userId + "&member2=" + friendId + "&roomId=" + roomId;
+    function getMessages(userId, friendId, roomId, isP2P) {
+        $('#roomId').val(0);
+        var getMsg = "<%= Config.getUserMessageUrl%>" + "member1=" + userId + "&member2=" + friendId + "&roomId=" + roomId + "&pp=" + isP2P;
         jQuery.ajax({
             url: getMsg,
             type: "GET",
             success: function (item) {
                 var msg = JSON.parse(item);
-                if (msg.length > 0) {
-                    $('#roomId').val(msg[0]['roomId']);
-                }
-
                 jQuery.each(msg, function (key, value) {
                     processTextMessage(value, true);
                 });
@@ -380,6 +435,7 @@
             data: {'userFriendId': userFriendId, "status": status},
             success: function (item) {
                 showFriendRequests();
+                location.reload();
             },
             error: function (xhr) {
             }
@@ -444,11 +500,12 @@
     function generateMessage(event) {
         if (event.keyCode === 13) {
             var txt = $("#txtMessage");
-            var content=txt.val();
+            var content = txt.val();
+            var roomId = $("#roomId").val();
             var data = {
-                "roomId": $("#roomId").val(),
+                "roomId": roomId,
                 "fromUserId":<%= user.getUserId()%>,
-                "toUserId": 0,
+                "toUserId": currentChatId,
                 "content": encodeURI(content)
             };
             var msg = {
@@ -459,6 +516,29 @@
             sendMessage(messageData);
             txt.val(null);
         }
+    }
+
+    function logOut() {
+
+    }
+
+    function addToGroupRequest(data) {
+        var addContactApi = "<%= Config.addContactToChatUrl%>";
+        var userId = parseInt(currentChatId);
+        var roomId = $("#roomId").val();
+        jQuery.ajax({
+            url: addContactApi,
+            type: "POST",
+            data: {'email': data, "userId": userId, "roomId": roomId},
+            success: function (item) {
+                var msg = document.getElementById("contactEmailHelp");
+                $("#contactEmailHelp").css("color", "red");
+                msg.innerHTML = item;
+            },
+            error: function (xhr) {
+                $("#contactEmailHelp").innerHTML = xhr;
+            }
+        });
     }
 
 </script>

@@ -26,23 +26,20 @@ public class MessageDaoImpl implements MessageDao {
         Room room = null;
         List<Member> members = new ArrayList<>();
         try {
-            String query = "select * from members where  user_id= ? or user_id= ? and connection_status = ?";
+            String query = "select m1.room_id from members as m1 join members as m2 on m2.user_id = ? and m2.connection_status = ? and m1.room_id = m2.room_id where m1.user_id= ? and m1.connection_status = ?";
             ps = (PreparedStatement) connection.prepareStatement(query);
             ps.setInt(1, from);
-            ps.setInt(2, to);
-            ps.setInt(3, ConnectionStatus.Connected.value);
+            ps.setInt(2, ConnectionStatus.Connected.value);
+            ps.setInt(3, to);
+            ps.setInt(4, ConnectionStatus.Connected.value);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Member member;
                 member = Parser.parser(rs, Member.class);
                 members.add(member);
             }
-            if (members.size() == 2) {
-                if (members.get(0).getRoomId() == members.get(1).getRoomId()) {
-                    room = getRoom(members.get(0).getRoomId());
-                }
-            }
-
+            if (members.size() > 0)
+                room = getRoom(members.get(0).getRoomId());
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -54,7 +51,6 @@ public class MessageDaoImpl implements MessageDao {
                 }
             }
         }
-
 
         return room;
     }
@@ -90,6 +86,32 @@ public class MessageDaoImpl implements MessageDao {
     }
 
     @Override
+    public void updateRoom(Room room) {
+
+        PreparedStatement ps = null;
+        try {
+            String query = "UPDATE room SET room_name=?,created_by=?,active=? WHERE room_id=?";
+            ps = connection.prepareStatement(query);
+            ps.setString(1, room.getRoomName());
+            ps.setInt(2, room.getCreatedBy());
+            ps.setInt(3, room.getActive());
+            ps.setInt(4, room.getRoomId());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Override
     public Member addMemberToRoom(Member member) {
         PreparedStatement ps = null;
         Member newMember = null;
@@ -114,6 +136,11 @@ public class MessageDaoImpl implements MessageDao {
                     e.printStackTrace();
                 }
             }
+        }
+        if (newMember != null) {
+            Room room = getRoom(newMember.getRoomId());
+            room.setRoomName(room.getRoomName().concat(newMember.getUser().getFullName()));
+            updateRoom(room);
         }
         return newMember;
     }
@@ -141,7 +168,7 @@ public class MessageDaoImpl implements MessageDao {
             }
         }
         if (room != null) {
-            room.setMembers(getMembers(roomId));
+            // room.setMembers(getMembers(roomId));
         }
         return room;
     }
@@ -161,7 +188,6 @@ public class MessageDaoImpl implements MessageDao {
             }
 
 
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -173,7 +199,12 @@ public class MessageDaoImpl implements MessageDao {
                 }
             }
         }
-
+        if (members.size() > 0) {
+            for (Member member : members) {
+                member.setRoom(getRoom(member.getRoomId()));
+                member.setUser(new DAOImpl().getUserDao().getUser(member.getUserId()));
+            }
+        }
         return members;
     }
 
@@ -293,6 +324,7 @@ public class MessageDaoImpl implements MessageDao {
         }
         if (member != null) {
             member.setRoom(getRoom(member.getRoomId()));
+            member.setUser(new DAOImpl().getUserDao().getUser(member.getUserId()));
         }
         return member;
     }
@@ -329,11 +361,45 @@ public class MessageDaoImpl implements MessageDao {
     }
 
     @Override
+    public List<Message> getP2PMsgList(int roomId, int member1, int member2) {
+        PreparedStatement ps = null;
+        List<Message> messages = new ArrayList<>();
+        try {
+            String query = "select * from message WHERE user_id IN (?,?) and room_id=?  ORDER by message_id DESC LIMIT 20 ";
+            ps = connection.prepareStatement(query);
+            ps.setInt(1, member1);
+            ps.setInt(2, member2);
+            ps.setInt(3, roomId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Message msg;
+                msg = Parser.parser(rs, Message.class);
+                messages.add(msg);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        for (Message msg : messages) {
+            msg.setRoom(getRoom(msg.getRoomId()));
+        }
+        return messages;
+    }
+
+    @Override
     public List<Message> getRecentMessage(int userId) {
         PreparedStatement ps = null;
         List<Message> messages = new ArrayList<>();
         try {
-            String query = "select * from message as m left JOIN room as r on m.room_id=r.room_id LEFT JOIN members as mb on r.room_id=mb.room_id where mb.user_id=? ORDER by m.message_id ASC LIMIT 20 ";
+            String query = "select m.* from message as m left join members as mb on m.room_id=mb.room_id where mb.user_id=? group by mb.room_id ORDER by m.message_id ASC LIMIT 20 ";
             ps = connection.prepareStatement(query);
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -358,5 +424,32 @@ public class MessageDaoImpl implements MessageDao {
             msg.setRoom(getRoom(msg.getRoomId()));
         }
         return messages;
+    }
+
+    @Override
+    public boolean isUserExitsInThisRoom(int roomId, int userId) {
+        PreparedStatement ps = null;
+        Member member = null;
+        try {
+            String query = "select * from members where room_id=? and user_id=?";
+            ps = connection.prepareStatement(query);
+            ps.setInt(1, roomId);
+            ps.setInt(2, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                member = Parser.parser(rs, Member.class);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return member != null;
     }
 }

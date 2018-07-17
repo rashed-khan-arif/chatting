@@ -32,11 +32,13 @@ public class MessageProcessor implements IMessageProcessor {
                 message.setRoomId(isP2P.getRoomId());
                 message.setMessageContent(messageItem.getContent());
                 message.setMsgDate(new Date());
+                message.setUserId(messageItem.getFromUserId());
                 sentMessage = send(message);
             } else {
-                User to = dao.getUserDao().getUser(messageItem.getToUserId());
                 Room room = new Room();
-                room.setRoomName(to.getFullName());
+                room.setRoomName("Group\n: ");
+                room.setActive(1);
+                room.setCreatedBy(messageItem.getFromUserId());
                 Room newRoom = dao.getMessageDao().createRoom(room);
                 Member m1, m2;
                 m1 = new Member();
@@ -46,15 +48,25 @@ public class MessageProcessor implements IMessageProcessor {
                 m2 = new Member();
                 m2.setRoomId(newRoom.getRoomId());
                 m2.setUserId(messageItem.getToUserId());
-                m2.setConnectionStatus(ConnectionStatus.Disconnected.value);
+                m2.setConnectionStatus(ConnectionStatus.Connected.value);
                 dao.getMessageDao().addMemberToRoom(m1);
                 dao.getMessageDao().addMemberToRoom(m2);
                 message.setRoomId(newRoom.getRoomId());
                 message.setMsgDate(new Date());
+                message.setUserId(messageItem.getFromUserId());
                 message.setMessageContent(messageItem.getContent());
                 sentMessage = send(message);
             }
         } else {
+            boolean inRoom = dao.getMessageDao().isUserExitsInThisRoom(messageItem.getRoomId(), messageItem.getToUserId());
+            if (!inRoom) {
+                Member m1;
+                m1 = new Member();
+                m1.setUserId(messageItem.getFromUserId());
+                m1.setRoomId(messageItem.getRoomId());
+                m1.setConnectionStatus(ConnectionStatus.Connected.value);
+                dao.getMessageDao().addMemberToRoom(m1);
+            }
             message.setRoomId(messageItem.getRoomId());
             message.setMessageContent(messageItem.getContent());
             message.setMsgDate(new Date());
@@ -78,6 +90,6 @@ public class MessageProcessor implements IMessageProcessor {
 
     @Override
     public List<Message> getMessagesByRoom(int roomId) {
-        return dao.getMessageDao().getMessageList(roomId);
+        return dao.getMessageDao().getMessageByRoom(roomId);
     }
 }

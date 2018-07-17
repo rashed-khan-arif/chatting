@@ -52,17 +52,6 @@ public class Room {
         return members;
     }
 
-    public boolean isUserExitsInRoom(int userId) {
-        for (Member rc : members) {
-            if (rc.getUserId() == userId)
-                return true;
-        }
-        return false;
-    }
-
-    public void setMembers(List<Member> members) {
-        this.members = members;
-    }
 
     public int getCreatedBy() {
         return createdBy;

@@ -11,6 +11,8 @@ public interface MessageDao {
 
     Room createRoom(Room room);
 
+    void updateRoom(Room room);
+
     Member addMemberToRoom(Member member);
 
     Member getMember(int memberId);
@@ -27,5 +29,9 @@ public interface MessageDao {
 
     List<Message> getMessageByRoom(int roomId);
 
+    List<Message> getP2PMsgList(int roomId,int member1, int member2);
+
     List<Message> getRecentMessage(int userId);
+
+    boolean isUserExitsInThisRoom(int roomId,int userId);
 }

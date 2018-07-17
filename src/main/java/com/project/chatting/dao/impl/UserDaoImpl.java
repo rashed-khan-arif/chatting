@@ -37,7 +37,8 @@ public class UserDaoImpl implements UserDao {
             while (rs.next()) {
                 user = Parser.parser(rs, User.class);
             }
-            user.setPassword(null);
+            if (user != null)
+                user.setPassword(null);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

@@ -12,6 +12,7 @@ public class Member {
     @ParseName("connection_status")
     private int connectionStatus;
     private Room room;
+    private User user;
 
     public int getConnectionId() {
         return connectionId;
@@ -51,5 +52,13 @@ public class Member {
 
     public void setRoom(Room room) {
         this.room = room;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

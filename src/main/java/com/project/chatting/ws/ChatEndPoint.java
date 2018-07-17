@@ -2,6 +2,7 @@ package com.project.chatting.ws;
 
 
 import com.google.gson.Gson;
+import com.project.chatting.dao.impl.DAOImpl;
 import com.project.chatting.data.IMessageProcessor;
 import com.project.chatting.data.MessageProcessor;
 import com.project.chatting.model.*;
@@ -36,12 +37,13 @@ public class ChatEndPoint {
         new Thread(() -> {
             TLSMessage smsg = new Gson().fromJson(message, TLSMessage.class);
             if (smsg.getEventId() == SocketEvent.SendMsg.value) {
-                MessageItem item = new Gson().fromJson(smsg.getData().toString(), MessageItem.class);
                 try {
+                    MessageItem item = new Gson().fromJson(smsg.getData().toString(), MessageItem.class);
                     Message sentMsg = MessageProcessor.getInstance().processMessage(item);
                     if (sentMsg != null) {
                         for (ChatEndPoint client : clients) {
-                            if (sentMsg.getRoom().isUserExitsInRoom(Integer.parseInt(client.userId)) && client.currentSession.isOpen()) {
+                            boolean isUserExits = new DAOImpl().getMessageDao().isUserExitsInThisRoom(sentMsg.getRoomId(), Integer.parseInt(client.userId));
+                            if (isUserExits && client.currentSession.isOpen()) {
                                 smsg.setEventId(SocketEvent.TextMessage.value);
                                 smsg.setData(sentMsg);
                                 client.currentSession.getBasicRemote().sendText(new Gson().toJson(smsg));
