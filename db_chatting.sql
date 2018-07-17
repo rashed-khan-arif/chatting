@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 15, 2018 at 10:12 PM
+-- Generation Time: Jul 17, 2018 at 11:13 PM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 5.6.23
 
@@ -30,7 +30,7 @@ CREATE TABLE `members` (
   `connection_id` int(11) NOT NULL,
   `room_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL COMMENT '(invited or joining request user id)',
-  `connection_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 . Invited 2. RequestJoin 3. CancellInvited 4. CancellJoiningRequest',
+  `connection_status` int(1) NOT NULL DEFAULT '0' COMMENT '1 . Invited 2. RequestJoin 3. CancellInvited 4. CancellJoiningRequest',
   `connection_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -39,9 +39,12 @@ CREATE TABLE `members` (
 --
 
 INSERT INTO `members` (`connection_id`, `room_id`, `user_id`, `connection_status`, `connection_date`) VALUES
-(1, 1, 5, 1, '2018-07-15 18:18:39'),
-(2, 1, 4, 1, '2018-07-15 18:18:39'),
-(3, 1, 3, 0, '2018-07-15 18:20:44');
+(34, 14, 3, 1, '2018-07-17 20:59:15'),
+(35, 14, 4, 1, '2018-07-17 20:59:15'),
+(36, 15, 5, 1, '2018-07-17 21:00:42'),
+(37, 15, 3, 1, '2018-07-17 21:00:42'),
+(38, 15, 4, 1, '2018-07-17 21:01:54'),
+(39, 15, 4, 1, '2018-07-17 21:02:16');
 
 -- --------------------------------------------------------
 
@@ -62,8 +65,10 @@ CREATE TABLE `message` (
 --
 
 INSERT INTO `message` (`message_id`, `room_id`, `message_content`, `msg_date`, `user_id`) VALUES
-(1, 1, 'hello', '2018-07-15 18:31:01', 5),
-(2, 1, 'yes', '2018-07-15 19:35:50', 4);
+(126, 14, 'hello%20', '2018-07-17 20:59:15', 3),
+(127, 14, 'hello', '2018-07-17 21:00:26', 4),
+(128, 15, 'hello', '2018-07-17 21:00:42', 5),
+(129, 15, 'yes%20', '2018-07-17 21:02:17', 4);
 
 -- --------------------------------------------------------
 
@@ -84,11 +89,11 @@ CREATE TABLE `notification` (
 --
 
 INSERT INTO `notification` (`notify_id`, `to_user`, `title`, `content`, `notify_date`) VALUES
-(1, 5, 'Friend Request Accepted', 'Sakib Accepted your request!', '2018-07-12 17:58:15'),
-(2, 5, 'Friend Request Accepted', 'Saon Khan Accepted your request!', '2018-07-12 18:00:00'),
-(3, 1, 'Friend Request Cancelled', 'Saon Khan Cancelled your friend request!', '2018-07-12 18:00:00'),
-(4, 4, 'Friend Request Accepted', 'zahid islam Accepted your friend request!', '2018-07-13 18:00:00'),
-(5, 4, 'Friend Request Accepted', 'zahid islam Accepted your friend request!', '2018-07-13 18:00:00');
+(11, 5, 'Friend Request Accepted', 'Sharif Accepted your friend request!', '2018-07-17 18:00:00'),
+(12, 5, 'Friend Request Accepted', 'Sakib Accepted your friend request!', '2018-07-17 18:00:00'),
+(13, 3, 'Friend Request Accepted', 'Sharif Accepted your friend request!', '2018-07-17 18:00:00'),
+(14, 4, 'SakibGroup ', 'Sakib added you to a group !', '2018-07-17 18:00:00'),
+(15, 4, 'zahid islamGroup ', 'zahid islam added you to a group !', '2018-07-17 18:00:00');
 
 -- --------------------------------------------------------
 
@@ -98,7 +103,7 @@ INSERT INTO `notification` (`notify_id`, `to_user`, `title`, `content`, `notify_
 
 CREATE TABLE `room` (
   `room_id` int(11) NOT NULL,
-  `room_name` varchar(30) NOT NULL,
+  `room_name` text NOT NULL,
   `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_by` int(11) NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '1'
@@ -109,7 +114,8 @@ CREATE TABLE `room` (
 --
 
 INSERT INTO `room` (`room_id`, `room_name`, `created_date`, `created_by`, `active`) VALUES
-(1, 'Test', '2018-07-15 18:18:11', 1, 1);
+(14, 'Group\n: SakibSharif', '2018-07-17 20:59:15', 3, 0),
+(15, 'Group\n: zahid islamSakibSharifSharif', '2018-07-17 21:00:42', 5, 0);
 
 -- --------------------------------------------------------
 
@@ -158,10 +164,9 @@ CREATE TABLE `user_friend` (
 --
 
 INSERT INTO `user_friend` (`user_friend_id`, `user_id`, `friend_id`, `request_status`, `create_date`) VALUES
-(32, 5, 3, 2, '2018-07-12 16:29:36'),
-(33, 5, 2, 2, '2018-07-12 18:34:06'),
-(34, 1, 2, 3, '2018-07-12 18:41:46'),
-(51, 4, 5, 2, '2018-07-13 20:03:17');
+(57, 5, 4, 2, '2018-07-17 19:41:50'),
+(58, 5, 3, 2, '2018-07-17 19:42:17'),
+(59, 3, 4, 2, '2018-07-17 19:42:37');
 
 --
 -- Indexes for dumped tables
@@ -211,22 +216,22 @@ ALTER TABLE `user_friend`
 -- AUTO_INCREMENT for table `members`
 --
 ALTER TABLE `members`
-  MODIFY `connection_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `connection_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 --
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message`
-  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 --
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notify_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `notify_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 --
 -- AUTO_INCREMENT for table `room`
 --
 ALTER TABLE `room`
-  MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 --
 -- AUTO_INCREMENT for table `user`
 --
@@ -236,7 +241,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `user_friend`
 --
 ALTER TABLE `user_friend`
-  MODIFY `user_friend_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `user_friend_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
