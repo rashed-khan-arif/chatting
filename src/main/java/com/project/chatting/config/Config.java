@@ -3,8 +3,8 @@ package com.project.chatting.config;
 import com.project.chatting.model.FriendRequestStatus;
 
 public class Config {
-    private static String hostUrl = "http://localhost:8080/";
-    public static String chatUrl = "ws://localhost:8080/".concat("chat/");
+    private static String hostUrl = "http://constantrx.com:8181/";
+    public static String chatUrl = "ws://constantrx.com:8181/".concat("chat/");
     public static String addContactUrl = hostUrl.concat("addContact");
     public static String addContactToChatUrl = hostUrl.concat("addContactToChat");
     public static String getContactsUrl = hostUrl.concat("getContactList?userId=");
