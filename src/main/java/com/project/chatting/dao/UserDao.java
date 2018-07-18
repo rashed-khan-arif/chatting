@@ -10,10 +10,11 @@ public interface UserDao {
 
     User getUser(int userId);
 
+    User getUserByEmail(String email);
+
     User addUser(User user);
 
     boolean isEmailUnique(String email);
 
-    List<UserFriend> getFriendsByUserId(int userId);
 
 }

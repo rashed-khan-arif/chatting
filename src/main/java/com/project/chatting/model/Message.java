@@ -9,12 +9,13 @@ public class Message {
     private int messageId;
     @ParseName("room_id")
     private int roomId;
-    @ParseName("user_id")
-    private int userId;
     @ParseName("message_content")
     private String messageContent;
     @ParseName("msg_date")
     private Date msgDate;
+    @ParseName("user_id")
+    private int userId;
+    private Room room;
 
     public int getMessageId() {
         return messageId;
@@ -32,13 +33,6 @@ public class Message {
         this.roomId = roomId;
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
 
     public String getMessageContent() {
         return messageContent;
@@ -54,5 +48,21 @@ public class Message {
 
     public void setMsgDate(Date msgDate) {
         this.msgDate = msgDate;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }

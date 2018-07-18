@@ -1,8 +1,9 @@
 package com.project.chatting.servlet;
 
 import com.google.gson.Gson;
+import com.project.chatting.dao.Dao;
 import com.project.chatting.dao.impl.DAOImpl;
-import com.project.chatting.model.UserFriend;
+import com.project.chatting.model.Notification;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,16 +13,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(urlPatterns = "/getContactList")
-public class GetContactServlet extends HttpServlet {
+@WebServlet(urlPatterns = "/getNotifications")
+public class GetNotification extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int userId = Integer.parseInt(req.getParameter("userId"));
-        //new Thread(() -> {
-        List<UserFriend> users = new DAOImpl().getFriendDao().getFriendsByUserId(userId);
-        resp.setContentType("application/json");  // Set content type of the response so that jQuery knows what it can expect.
-        resp.setCharacterEncoding("UTF-8"); // You want world domination, huh?
-        resp.getWriter().write(new Gson().toJson(users));
-        // }).start();
+        Dao dao = new DAOImpl();
+        List<Notification> notifications = dao.getNotificationDao().getNotificationsByUser(userId);
+        resp.getOutputStream().print(new Gson().toJson(notifications));
     }
 }

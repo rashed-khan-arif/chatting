@@ -15,6 +15,15 @@ public class Notification {
     private String content;
     @ParseName("notify_date")
     private Date notifyDate;
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public int getNotifyId() {
         return notifyId;

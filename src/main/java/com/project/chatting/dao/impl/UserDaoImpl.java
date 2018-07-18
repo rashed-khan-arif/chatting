@@ -37,6 +37,34 @@ public class UserDaoImpl implements UserDao {
             while (rs.next()) {
                 user = Parser.parser(rs, User.class);
             }
+            if (user != null)
+                user.setPassword(null);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return user;
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        PreparedStatement ps = null;
+        User user = null;
+        try {
+            String query = "select * from user " +
+                    "where email='" + email + "' and active=1";
+            ps = (PreparedStatement) connection.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                user = Parser.parser(rs, User.class);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -106,39 +134,5 @@ public class UserDaoImpl implements UserDao {
         return user == null;
     }
 
-    @Override
-    public List<UserFriend> getFriendsByUserId(int userId) {
-        PreparedStatement ps = null;
-        List<UserFriend> userFriends = new ArrayList<>();
-        try {
-            String query = "select * from user_friend " +
-                    "where user_id='" + userId + "' ";
-            ps = (PreparedStatement) connection.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
-            UserFriend userFriend = null;
-            while (rs.next()) {
-                userFriend = Parser.parser(rs, UserFriend.class);
-                userFriends.add(userFriend);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        for (UserFriend uf : userFriends) {
-            uf.setFriend(getUser(uf.getFriendId()));
-            if (uf.getFriend() != null)
-                uf.getFriend().setPassword(null);
-            if (uf.getUser() != null)
-                uf.getUser().setPassword(null);
-        }
 
-        return userFriends;
-    }
 }

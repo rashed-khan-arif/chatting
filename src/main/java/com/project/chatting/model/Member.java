@@ -2,7 +2,7 @@ package com.project.chatting.model;
 
 import com.project.chatting.core.ParseName;
 
-public class RoomConnection {
+public class Member {
     @ParseName("connection_id")
     private int connectionId;
     @ParseName("room_id")
@@ -11,6 +11,8 @@ public class RoomConnection {
     private int userId;
     @ParseName("connection_status")
     private int connectionStatus;
+    private Room room;
+    private User user;
 
     public int getConnectionId() {
         return connectionId;
@@ -42,5 +44,21 @@ public class RoomConnection {
 
     public void setConnectionStatus(int connectionStatus) {
         this.connectionStatus = connectionStatus;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

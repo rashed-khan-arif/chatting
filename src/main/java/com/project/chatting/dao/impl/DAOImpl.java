@@ -1,8 +1,6 @@
 package com.project.chatting.dao.impl;
 
-import com.project.chatting.dao.AccountDAO;
-import com.project.chatting.dao.Dao;
-import com.project.chatting.dao.UserDao;
+import com.project.chatting.dao.*;
 
 public class DAOImpl implements Dao {
     @Override
@@ -13,5 +11,20 @@ public class DAOImpl implements Dao {
     @Override
     public UserDao getUserDao() {
         return new UserDaoImpl();
+    }
+
+    @Override
+    public IFriendDao getFriendDao() {
+        return new FriendDaoImpl();
+    }
+
+    @Override
+    public NotificationDao getNotificationDao() {
+        return new NotificationDaoImpl();
+    }
+
+    @Override
+    public MessageDao getMessageDao() {
+        return new MessageDaoImpl();
     }
 }
